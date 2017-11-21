@@ -3,6 +3,7 @@
 
 class Cursor {
   private:
+    double alpha;
     double cursorX;
     double cursorY;
     double cursorZ;
@@ -11,6 +12,7 @@ class Cursor {
   public:
     Cursor();
     void draw();
+    void setTransparency(double a);
     void setLocation(double x, double y, double z);
     void move(double x, double y, double z);
     void setMinZ(double _minZ);
