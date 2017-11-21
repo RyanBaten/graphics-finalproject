@@ -19,6 +19,7 @@
 #include "texturemap.h"
 #include "skybox.h"
 #include "ground.h"
+#include "cursor.h"
 
 #define Cos(x) (cos((x)*3.1415927/180))
 #define Sin(x) (sin((x)*3.1415927/180))
@@ -36,6 +37,7 @@ TextureMap *texture_map = new TextureMap();
 Light *light = new Light(GL_LIGHT0);
 SkyBox *skybox = new SkyBox(scale);
 Ground *ground = new Ground(groundSize, groundSize);
+Cursor *cursor = new Cursor();
 
 void display() {
   // Clear color and depth buffer
@@ -85,6 +87,8 @@ void display() {
 //  glTexCoord2f(0,0);  glVertex3f(scale,-1,scale);
 //  glTexCoord2f(0,scale);  glVertex3f(scale,-1,-scale);
 //  glEnd();
+  // Draw cursor
+  cursor->draw();
   // Disables
   glDisable(GL_TEXTURE_2D);
   glDisable(GL_FOG);
@@ -116,6 +120,18 @@ int key() {
     } else if (keys[SDLK_0]) {
       debug = !debug;
       light->indicatorOn();
+    } else if (keys[SDLK_i]) {
+      cursor->move(0.5,0,0);
+    } else if (keys[SDLK_j]) {
+      cursor->move(0,0,-0.5);
+    } else if (keys[SDLK_k]) {
+      cursor->move(-0.5,0,0);
+    } else if (keys[SDLK_l]) {
+      cursor->move(0,0,0.5);
+    } else if (keys[SDLK_t]) {
+      cursor->move(0,0.5,0);
+    } else if (keys[SDLK_y]) {
+      cursor->move(0,-0.5,0);
     }
   } else {
     if (keys[SDLK_ESCAPE]) {
@@ -187,8 +203,15 @@ int main() {
 
   // Set up ground 
   ground->setScale(2*scale/groundSize);
-  ground->generateVertices(0,10,0.1);
+  ground->generateVertices(0,10,0.15);
   ground->setTexture("textures/grass.png");
+
+  // Set up cursor
+  cursor->setLocation(5,10,10);
+  cursor->setMinY(0);
+  cursor->setWidth(0.5);
+  cursor->setTransparency(0.95);
+  cursor->setColor(0.8, 0, 0);
 
   // Setting light parameters
   light->setColor(1,1,1);
@@ -248,6 +271,7 @@ int main() {
   delete light;
   delete skybox;
   delete ground;
+  delete cursor;
   Mix_CloseAudio();
   SDL_Quit();
   return 0;

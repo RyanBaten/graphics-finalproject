@@ -7,16 +7,18 @@ class Cursor {
     double cursorX;
     double cursorY;
     double cursorZ;
-    double minZ;
+    double minY;
     double width;
+    double color[3];
   public:
     Cursor();
     void draw();
     void setTransparency(double a);
     void setLocation(double x, double y, double z);
     void move(double x, double y, double z);
-    void setMinZ(double _minZ);
+    void setMinY(double _minZ);
     void setWidth(double _width);
+    void setColor(double r, double g, double b);
     void getLocation(double* x, double* y, double* z);
 };
 
