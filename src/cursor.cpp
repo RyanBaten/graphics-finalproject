@@ -19,7 +19,7 @@ void Cursor::draw() {
   glPushMatrix();
   // Translation and scaling
   glTranslated(cursorX,0,cursorZ);
-  glScaled(width,width,width);
+  glScaled(width,1,width);
   // Enabling transparency
   glEnable(GL_BLEND);
   glDepthMask(0);
@@ -106,8 +106,8 @@ void Cursor::setColor(double r, double g, double b) {
   color[2] = b;
 }
 
-void Cursor::getLocation(double* x, double* y, double* z) {
-  *x = cursorX;
-  *y = cursorY;
-  *z = cursorZ;
+void Cursor::getLocation(double &x, double &y, double &z) {
+  x = cursorX;
+  y = cursorY;
+  z = cursorZ;
 }

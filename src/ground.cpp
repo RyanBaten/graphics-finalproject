@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <math.h>
 #include <stdlib.h>
 
@@ -48,7 +47,7 @@ void Ground::generateVertices(double min, double max, double maxDiff) {
   // Fill in first column with random entries, enforcing a max diff
   for (int i=0; i<sizeY; i++) {
     result = last+maxDiff-fmod(rand()/randmod,diffRange);
-    vertices[i][0] = std::min(std::max(result,min),max);
+    vertices[i][0] = fmin(fmax(result,min),max);
     last = vertices[i][0];
   }
 
@@ -56,7 +55,7 @@ void Ground::generateVertices(double min, double max, double maxDiff) {
   for (int j=1; j<sizeX; j++) {
     last = vertices[0][j-1];
     result = last+maxDiff-fmod(rand()/randmod,diffRange);
-    vertices[0][j] = std::min(std::max(result,min),max);
+    vertices[0][j] = fmin(fmax(result,min),max);
   }
 
   // Fill in everything else with random entries, enforcing a max diff
@@ -66,7 +65,7 @@ void Ground::generateVertices(double min, double max, double maxDiff) {
     for (int j=1; j<sizeX; j++) {
       last = (vertices[i][j-1] + vertices[i-1][j])/2;
       result = last+maxDiff-fmod(rand()/randmod,diffRange);
-      vertices[i][j] = std::min(std::max(result,min),max);
+      vertices[i][j] = fmin(fmax(result,min),max);
     }
   }
 

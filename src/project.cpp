@@ -20,6 +20,7 @@
 #include "skybox.h"
 #include "ground.h"
 #include "cursor.h"
+#include "track.h"
 
 #define Cos(x) (cos((x)*3.1415927/180))
 #define Sin(x) (sin((x)*3.1415927/180))
@@ -28,7 +29,7 @@ int debug = 0; // debug mode
 double fov = 55; // Field of view
 double asp = 1; // Aspect ratio
 double dim = 8; // Size of world
-double scale = 60; // Scale of skybox and ground
+double scale = 70; // Scale of skybox and ground
 double groundSize = 100; // Number of rows/cols in the ground matrix
 const GLfloat fogColor[4] = {1.0,1.0,1.0,1.0}; // Color of fog
 
@@ -38,6 +39,7 @@ Light *light = new Light(GL_LIGHT0);
 SkyBox *skybox = new SkyBox(scale);
 Ground *ground = new Ground(groundSize, groundSize);
 Cursor *cursor = new Cursor();
+Track *track = new Track();
 
 void display() {
   // Clear color and depth buffer
@@ -61,9 +63,11 @@ void display() {
   glFogi(GL_FOG_MODE, GL_LINEAR);
   glFogf(GL_FOG_START, 0);
   glFogf(GL_FOG_END, 2*scale);
-  glFogf(GL_FOG_DENSITY, 0.025);
+//  glFogf(GL_FOG_DENSITY, 0.025);
   glFogfv(GL_FOG_COLOR, fogColor);
   glHint(GL_FOG_HINT, GL_NICEST);
+  // Draw track
+  track->draw();
   // Draw ground
   ground->draw(-scale,0,-scale);
   // Draw everything
@@ -81,12 +85,6 @@ void display() {
     glTexCoord2f(0,1);  glVertex3f(1,20,-5);
     glEnd();
   }
-//  glBegin(GL_QUADS);
-//  glTexCoord2f(scale,scale);  glVertex3f(-scale,-1,-scale);
-//  glTexCoord2f(scale,0);  glVertex3f(-scale,-1,scale);
-//  glTexCoord2f(0,0);  glVertex3f(scale,-1,scale);
-//  glTexCoord2f(0,scale);  glVertex3f(scale,-1,-scale);
-//  glEnd();
   // Draw cursor
   cursor->draw();
   // Disables
@@ -132,6 +130,11 @@ int key() {
       cursor->move(0,0.5,0);
     } else if (keys[SDLK_y]) {
       cursor->move(0,-0.5,0);
+    } else if (keys[SDLK_RETURN]) {
+      double x,y,z;
+      cursor->getLocation(x,y,z);
+      track->addVertex(x,y,z);
+      track->generateTrack(0.1);
     }
   } else {
     if (keys[SDLK_ESCAPE]) {
@@ -272,6 +275,7 @@ int main() {
   delete skybox;
   delete ground;
   delete cursor;
+  delete track;
   Mix_CloseAudio();
   SDL_Quit();
   return 0;

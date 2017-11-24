@@ -19,7 +19,7 @@ class Cursor {
     void setMinY(double _minZ);
     void setWidth(double _width);
     void setColor(double r, double g, double b);
-    void getLocation(double* x, double* y, double* z);
+    void getLocation(double &x, double &y, double &z);
 };
 
 #endif
