@@ -45,7 +45,7 @@ void Track::addVertex(double x, double y, double z) {
   userVertices.push_back(x);
   userVertices.push_back(y);
   userVertices.push_back(z);
-  if (size >= 3) {
+  if (size >= 6) {
     double dx,dy,dz;
     dx = x-userVertices.at(size-3);
     dy = y-userVertices.at(size-2);
@@ -93,28 +93,7 @@ void Track::generateTrack(double smoothness) {
         trackVertices.push_back(result_y);
         trackVertices.push_back(result_z);
       }
-    } //else if (size-i >= 6) {
-//      x0 = userVertices.at(i);
-//      y0 = userVertices.at(i+1);
-//      z0 = userVertices.at(i+2);
-//      x1 = userVertices.at(i+3);
-//      y1 = userVertices.at(i+4);
-//      z1 = userVertices.at(i+5);
-//      // Distance between first and second point
-//      distance = sqrt(pow(x1-x0,2) + pow(y1-y0,2) + pow(z1-z0,2));
-//      // Calculate number of subsections to use
-//      iterations = distance/smoothness - smoothness;
-//      // Generate intermediate points between two points to use
-//      for (int j=1; j<iterations; j++) {
-//        t = j/iterations;
-//        result_x = t*x1+(1-t)*x0;
-//        result_y = t*y1+(1-t)*y0;
-//        result_z = t*z1+(1-t)*z0;
-//        trackVertices.push_back(result_x);
-//        trackVertices.push_back(result_y);
-//        trackVertices.push_back(result_z);
-//      }
-//    }
+    } 
   }
 }
 

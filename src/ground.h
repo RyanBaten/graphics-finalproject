@@ -16,7 +16,7 @@ class Ground {
     int sizeX; 
     int sizeY; 
     double scale;
-    double *normals;
+    double **normals;
     double **vertices;
   public:
     Ground(double _sizeX, double _sizeY);

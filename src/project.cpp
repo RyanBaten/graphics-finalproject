@@ -135,6 +135,8 @@ int key() {
       cursor->getLocation(x,y,z);
       track->addVertex(x,y,z);
       track->generateTrack(0.1);
+    } else if (keys[SDLK_r]) {
+      track->clearVertices();
     }
   } else {
     if (keys[SDLK_ESCAPE]) {
@@ -215,6 +217,10 @@ int main() {
   cursor->setWidth(0.5);
   cursor->setTransparency(0.95);
   cursor->setColor(0.8, 0, 0);
+
+  // Set up track
+  track->setTrackWidth(1);
+  track->setRailWidth(0.2);
 
   // Setting light parameters
   light->setColor(1,1,1);
