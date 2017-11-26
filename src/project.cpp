@@ -28,7 +28,7 @@
 int debug = 0; // debug mode
 double fov = 55; // Field of view
 double asp = 1; // Aspect ratio
-double dim = 8; // Size of world
+double dim = 16; // Size of world
 double scale = 70; // Scale of skybox and ground
 double groundSize = 100; // Number of rows/cols in the ground matrix
 const GLfloat fogColor[4] = {1.0,1.0,1.0,1.0}; // Color of fog
@@ -73,9 +73,11 @@ void display() {
   // Draw everything
   if (debug) {
     // Draw a quad to test out textures on
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_TEXTURE_2D);
     glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
-    texture_map->bindTexture("wood");
+    texture_map->bindTexture("tree");
     glColor3f(1,1,1);
     glBegin(GL_QUADS);
     glNormal3f(0,0,1);
@@ -84,6 +86,8 @@ void display() {
     glTexCoord2f(0,0);  glVertex3f(1,21,-5);
     glTexCoord2f(0,1);  glVertex3f(1,20,-5);
     glEnd();
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_BLEND);
   }
   // Draw cursor
   cursor->draw();
@@ -154,6 +158,7 @@ int key() {
     } else if (keys[SDLK_0]) {
       debug = !debug;
       light->indicatorOff();
+      light->moveTo(.4*scale,.4*scale,scale);
     }
   }
   // Keep the program running
@@ -197,6 +202,7 @@ int main() {
   // Initialize texture map
   texture_map->addTexture("wood", "textures/wood.png");
   texture_map->addTexture("grass", "textures/grass.png");
+  texture_map->addTexture("tree", "textures/tree.png");
 
   // Set up skybox
   skybox->setNTexture("textures/skybox_n.png");
@@ -208,7 +214,7 @@ int main() {
 
   // Set up ground 
   ground->setScale(2*scale/groundSize);
-  ground->generateVertices(0,10,0.15);
+  ground->generateVertices(0,10,0.2);
   ground->setTexture("textures/grass.png");
 
   // Set up cursor
@@ -220,7 +226,8 @@ int main() {
 
   // Set up track
   track->setTrackWidth(1);
-  track->setRailWidth(0.2);
+  track->setRailWidth(0.4);
+  track->setRailHeight(0.1);
 
   // Setting light parameters
   light->setColor(1,1,1);
@@ -269,6 +276,9 @@ int main() {
     if (t-t0>0.05) {
       run = key();
       t0 = t;
+      if (debug) {
+        light->moveTo(scale*Sin(t*30),.4*scale,scale*Cos(t*30));
+      }
     }
     // Display
     display();

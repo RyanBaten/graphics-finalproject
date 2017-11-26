@@ -17,6 +17,7 @@ class Track {
     GLuint middleTexture;
     double trackWidth;
     double railWidth;
+    double railHeight;
     std::vector<double> userVertices;
     std::vector<double> trackVertices;
     std::vector<double> normals;
@@ -28,6 +29,7 @@ class Track {
     void generateTrack(double smoothness);
     void setTrackWidth(double w);
     void setRailWidth(double w);
+    void setRailHeight(double h);
     void setRailTexture(std::string fn);
     void setMiddleTexture(std::string fn);
 };
