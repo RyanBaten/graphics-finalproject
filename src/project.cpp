@@ -21,6 +21,7 @@
 #include "ground.h"
 #include "cursor.h"
 #include "track.h"
+#include "object.h"
 
 #define Cos(x) (cos((x)*3.1415927/180))
 #define Sin(x) (sin((x)*3.1415927/180))
@@ -40,6 +41,7 @@ SkyBox *skybox = new SkyBox(scale);
 Ground *ground = new Ground(groundSize, groundSize);
 Cursor *cursor = new Cursor();
 Track *track = new Track();
+Object *object = new Object();
 
 void display() {
   // Clear color and depth buffer
@@ -70,6 +72,8 @@ void display() {
   track->draw();
   // Draw ground
   ground->draw(-scale,0,-scale);
+  // Draw coaster
+  object->draw(5,5,5,0,0,0,1);
   // Draw everything
   if (debug) {
     // Draw a quad to test out textures on
@@ -196,8 +200,8 @@ int main() {
   reshape(screen->w, screen->h);
 
   // Set up camera
-  camera->moveTo(0,20,0);
-  camera->setViewLocation(0,20,-1);
+  camera->moveTo(0,10,0);
+  camera->setViewLocation(5,5,10);
 
   // Initialize texture map
   texture_map->addTexture("wood", "textures/wood.png");
@@ -218,7 +222,7 @@ int main() {
   ground->setTexture("textures/grass.png");
 
   // Set up cursor
-  cursor->setLocation(5,10,10);
+  cursor->setLocation(5,5,10);
   cursor->setMinY(0);
   cursor->setWidth(0.5);
   cursor->setTransparency(0.95);
@@ -228,6 +232,10 @@ int main() {
   track->setTrackWidth(1);
   track->setRailWidth(0.4);
   track->setRailHeight(0.1);
+
+  // Object test
+  object->loadFile("objects/coaster.obj");
+  object->loadTexture("textures/coasterTexture.png");
 
   // Setting light parameters
   light->setColor(1,1,1);
@@ -246,9 +254,7 @@ int main() {
   music = Mix_LoadMUS("music/408201__setuniman__mark-time-1p77b.wav");
   if (!music) exit(1);
   // Play music
-//  Mix_PlayMusic(music,-1);
-//  printf("This project uses these sounds from freesound:\n");
-//  printf("mark time 1P77b by Setuniman (https://freesound.org/people/Setuniman/sounds/408201/)\n");
+  Mix_PlayMusic(music,-1);
 
   // SDL event loop
   while (run) {

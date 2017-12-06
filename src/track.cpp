@@ -6,18 +6,12 @@
 
 #define pi 3.14159265
 
-int sgn(double x) {
-  if (x>0) {
-    return 1;
-  } 
-  return x<0?-1:0;
-}
-
 Track::Track() {
 }
 
 void Track::draw() {
   int iterations = trackVertices.size()-24;
+  int norm = 0;
 
 //  glEnable(GL_TEXTURE_2D);
 //  glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
@@ -27,25 +21,33 @@ void Track::draw() {
   glBegin(GL_QUADS);
     for (int i=0; i<iterations; i+=12) {
       // Top
+      glNormal3f(normals.at(norm+6), normals.at(norm+7), normals.at(norm+8));
       glVertex3f(trackVertices.at(i),trackVertices.at(i+1),trackVertices.at(i+2));
       glVertex3f(trackVertices.at(i+24),trackVertices.at(i+25),trackVertices.at(i+26));
       glVertex3f(trackVertices.at(i+30),trackVertices.at(i+31),trackVertices.at(i+32));
       glVertex3f(trackVertices.at(i+6),trackVertices.at(i+7),trackVertices.at(i+8));
       // Bottom
+      glNormal3f(normals.at(norm+9), normals.at(norm+10), normals.at(norm+11));
       glVertex3f(trackVertices.at(i+3),trackVertices.at(i+4),trackVertices.at(i+5));
       glVertex3f(trackVertices.at(i+27),trackVertices.at(i+28),trackVertices.at(i+29));
       glVertex3f(trackVertices.at(i+33),trackVertices.at(i+34),trackVertices.at(i+35));
       glVertex3f(trackVertices.at(i+9),trackVertices.at(i+10),trackVertices.at(i+11));
       // Left Side
+      glNormal3f(normals.at(norm), normals.at(norm+1), normals.at(norm+2));
       glVertex3f(trackVertices.at(i+3),trackVertices.at(i+4),trackVertices.at(i+5));
       glVertex3f(trackVertices.at(i+27),trackVertices.at(i+28),trackVertices.at(i+29));
       glVertex3f(trackVertices.at(i+24),trackVertices.at(i+25),trackVertices.at(i+26));
       glVertex3f(trackVertices.at(i),trackVertices.at(i+1),trackVertices.at(i+2));
       // Right Side
+      glNormal3f(normals.at(norm+3), normals.at(norm+4), normals.at(norm+5));
       glVertex3f(trackVertices.at(i+6),trackVertices.at(i+7),trackVertices.at(i+8));
       glVertex3f(trackVertices.at(i+30),trackVertices.at(i+31),trackVertices.at(i+32));
       glVertex3f(trackVertices.at(i+33),trackVertices.at(i+34),trackVertices.at(i+35));
       glVertex3f(trackVertices.at(i+9),trackVertices.at(i+10),trackVertices.at(i+11));
+      // Iterate on normals
+      if (!i%2) {
+        norm += 12;
+      }
     }
   glEnd();
   glPopMatrix();
@@ -81,7 +83,8 @@ void Track::generateTrack(double smoothness) {
   double x0,y0,z0,x1,y1,z1,x2,y2,z2;
   double result_x, result_y, result_z;
   double last_x, last_y, last_z;
-  double diff_x, diff_z;
+  double diff_x, diff_y, diff_z, diff_dist;
+  double side_norm_x, side_norm_z;
   // Clear current vertices
   trackVertices.clear();
   // Setting the veriables containing the last point
@@ -110,7 +113,7 @@ void Track::generateTrack(double smoothness) {
       // Calculate number of subsections to use
       iterations = distance/smoothness - smoothness;
       // Generate points using 3 point Bezier curve
-      for (int j=0; j<iterations; j++) {
+      for (int j=1; j<iterations; j++) {
         t = j/iterations;
         // Calculate next point
         result_x = pow(t,2)*x2 + 2*(1-t)*t*x1 + pow(1-t,2)*x0;
@@ -118,47 +121,71 @@ void Track::generateTrack(double smoothness) {
         result_z = pow(t,2)*z2 + 2*(1-t)*t*z1 + pow(1-t,2)*z0;
         // Calculate differences
         diff_x = result_x - last_x;
+        diff_y = result_y - last_y;
         diff_z = result_z - last_z;
         // Normalize differences using softmax
-        diff_x = exp(diff_x)/(exp(diff_x)+exp(diff_z));
-        diff_z = exp(diff_z)/(exp(diff_x)+exp(diff_z));
-        diff_x *= sgn(result_x - last_x);
-        diff_z *= sgn(result_z - last_z);
+        diff_dist = sqrt(diff_x*diff_x + diff_z*diff_z);
+        if (diff_dist != 0) {
+          side_norm_x = diff_x / diff_dist;
+          side_norm_z = diff_z / diff_dist;
+        } else {
+          side_norm_x = 0;
+          side_norm_z = 0;
+        }
         // Insert vertices for the track
         // Use cross product of vector between last and current point
         // and the up vector the get offsets right
           // Top left, left side
-          trackVertices.push_back(last_x-diff_z*(-trackWidth/2-railWidth));
-          trackVertices.push_back(result_y+railHeight/2);
-          trackVertices.push_back(last_z+diff_x*(-trackWidth/2-railWidth));
+          trackVertices.push_back(last_x-side_norm_z*(-trackWidth/2-railWidth));
+          trackVertices.push_back(last_y+railHeight/2);
+          trackVertices.push_back(last_z+side_norm_x*(-trackWidth/2-railWidth));
           // Bottom left, left side
-          trackVertices.push_back(last_x-diff_z*(-trackWidth/2-railWidth));
-          trackVertices.push_back(result_y-railHeight/2);
-          trackVertices.push_back(last_z+diff_x*(-trackWidth/2-railWidth));
+          trackVertices.push_back(last_x-side_norm_z*(-trackWidth/2-railWidth));
+          trackVertices.push_back(last_y-railHeight/2);
+          trackVertices.push_back(last_z+side_norm_x*(-trackWidth/2-railWidth));
           // Top Right, left side
-          trackVertices.push_back(last_x-diff_z*(-trackWidth/2));
+          trackVertices.push_back(last_x-side_norm_z*(-trackWidth/2));
           trackVertices.push_back(last_y+railHeight/2);
-          trackVertices.push_back(last_z+diff_x*(-trackWidth/2));
+          trackVertices.push_back(last_z+side_norm_x*(-trackWidth/2));
           // Bottom Right, left side
-          trackVertices.push_back(last_x-diff_z*(-trackWidth/2));
+          trackVertices.push_back(last_x-side_norm_z*(-trackWidth/2));
           trackVertices.push_back(last_y-railHeight/2);
-          trackVertices.push_back(last_z+diff_x*(-trackWidth/2));
+          trackVertices.push_back(last_z+side_norm_x*(-trackWidth/2));
           // Top left, right side
-          trackVertices.push_back(last_x-diff_z*(trackWidth/2));
+          trackVertices.push_back(last_x-side_norm_z*(trackWidth/2));
           trackVertices.push_back(last_y+railHeight/2);
-          trackVertices.push_back(last_z+diff_x*(trackWidth/2));
+          trackVertices.push_back(last_z+side_norm_x*(trackWidth/2));
           // Bottom left, right side
-          trackVertices.push_back(last_x-diff_z*(trackWidth/2));
+          trackVertices.push_back(last_x-side_norm_z*(trackWidth/2));
           trackVertices.push_back(last_y-railHeight/2);
-          trackVertices.push_back(last_z+diff_x*(trackWidth/2));
+          trackVertices.push_back(last_z+side_norm_x*(trackWidth/2));
           // Top Right, right side
-          trackVertices.push_back(last_x-diff_z*(trackWidth/2+railWidth));
+          trackVertices.push_back(last_x-side_norm_z*(trackWidth/2+railWidth));
           trackVertices.push_back(last_y+railHeight/2);
-          trackVertices.push_back(last_z+diff_x*(trackWidth/2+railWidth));
+          trackVertices.push_back(last_z+side_norm_x*(trackWidth/2+railWidth));
           // Bottom Right, left side
-          trackVertices.push_back(last_x-diff_z*(trackWidth/2+railWidth));
+          trackVertices.push_back(last_x-side_norm_z*(trackWidth/2+railWidth));
           trackVertices.push_back(last_y-railHeight/2);
-          trackVertices.push_back(last_z+diff_x*(trackWidth/2+railWidth));
+          trackVertices.push_back(last_z+side_norm_x*(trackWidth/2+railWidth));
+        // Put in correct normals for lighting
+        // Since the side normals are used in generating the trackVertices,
+        // put them in the vector first before finding the up and down vectors
+          // Left
+          normals.push_back(side_norm_z);
+          normals.push_back(0);
+          normals.push_back(-side_norm_x);
+          // Right
+          normals.push_back(-side_norm_z);
+          normals.push_back(0);
+          normals.push_back(side_norm_x);
+          // Up
+          normals.push_back(diff_y*diff_x);
+          normals.push_back(-diff_x*diff_x-diff_z*diff_z);
+          normals.push_back(diff_y*diff_z);
+          // Down
+          normals.push_back(-diff_y*diff_x);
+          normals.push_back(diff_x*diff_x+diff_z*diff_z);
+          normals.push_back(-diff_y*diff_z);
         // Update Last values
         last_x = result_x;
         last_y = result_y;
