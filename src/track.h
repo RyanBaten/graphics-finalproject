@@ -32,6 +32,7 @@ class Track {
     void setRailHeight(double h);
     void setRailTexture(std::string fn);
     void setMiddleTexture(std::string fn);
+    void getIthTrackVertex(int i, double &x, double &y, double &z);
 };
 
 #endif

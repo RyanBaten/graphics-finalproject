@@ -21,12 +21,17 @@
 #include "ground.h"
 #include "cursor.h"
 #include "track.h"
-#include "object.h"
+#include "coaster.h"
 
 #define Cos(x) (cos((x)*3.1415927/180))
 #define Sin(x) (sin((x)*3.1415927/180))
 
-int debug = 0; // debug mode
+#define MODE_CONSTRUCT 1
+#define MODE_RIDE 2
+#define MODE_PRESET 3
+#define MODE_DEBUG 4
+
+int mode = 1; // Modes: 1 Construction, 2 Riding, 3 Preset Track, 4 debug
 double fov = 55; // Field of view
 double asp = 1; // Aspect ratio
 double dim = 16; // Size of world
@@ -41,7 +46,7 @@ SkyBox *skybox = new SkyBox(scale);
 Ground *ground = new Ground(groundSize, groundSize);
 Cursor *cursor = new Cursor();
 Track *track = new Track();
-Object *object = new Object();
+Coaster *coaster = new Coaster();
 
 void display() {
   // Clear color and depth buffer
@@ -65,7 +70,6 @@ void display() {
   glFogi(GL_FOG_MODE, GL_LINEAR);
   glFogf(GL_FOG_START, 0);
   glFogf(GL_FOG_END, 2*scale);
-//  glFogf(GL_FOG_DENSITY, 0.025);
   glFogfv(GL_FOG_COLOR, fogColor);
   glHint(GL_FOG_HINT, GL_NICEST);
   // Draw track
@@ -73,9 +77,9 @@ void display() {
   // Draw ground
   ground->draw(-scale,0,-scale);
   // Draw coaster
-  object->draw(5,5,5,0,0,0,1);
+  coaster->draw();
   // Draw everything
-  if (debug) {
+  if (mode == MODE_DEBUG) {
     // Draw a quad to test out textures on
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -94,7 +98,9 @@ void display() {
     glDisable(GL_BLEND);
   }
   // Draw cursor
-  cursor->draw();
+  if (mode == MODE_CONSTRUCT) {
+    cursor->draw();
+  }
   // Disables
   glDisable(GL_TEXTURE_2D);
   glDisable(GL_FOG);
@@ -110,10 +116,26 @@ int key() {
   Uint8* keys = SDL_GetKeyState(NULL);
 //  int shift = SDL_GetModState()&KMOD_SHIFT;
   // Exit on ESC
-  if (!debug) {
-    if (keys[SDLK_ESCAPE]) {
-      return 0;
-    } else if (keys[SDLK_UP]) {
+  if (keys[SDLK_ESCAPE]) {
+    return 0;
+  // Mode Switching 
+  } else if (keys[SDLK_1]) {
+    mode = MODE_CONSTRUCT;
+    light->indicatorOff();
+    light->moveTo(.4*scale,.4*scale,scale);
+  } else if (keys[SDLK_2]) {
+    mode = MODE_RIDE;
+    light->indicatorOff();
+    light->moveTo(.4*scale,.4*scale,scale);
+  } else if (keys[SDLK_3]) {
+    mode = MODE_PRESET;
+    light->indicatorOff();
+    light->moveTo(.4*scale,.4*scale,scale);
+  } else if (keys[SDLK_4]) {
+    mode = MODE_DEBUG;
+    light->indicatorOn();
+  } else if (mode == MODE_CONSTRUCT) {
+    if (keys[SDLK_UP]) {
       camera->rotate(0,5);
     } else if (keys[SDLK_DOWN]) {
       camera->rotate(0,-5);
@@ -123,9 +145,6 @@ int key() {
       camera->rotate(-5,0);
     } else if (keys[SDLK_w]) {
       camera->moveForward(0.5);
-    } else if (keys[SDLK_0]) {
-      debug = !debug;
-      light->indicatorOn();
     } else if (keys[SDLK_i]) {
       cursor->move(0.5,0,0);
     } else if (keys[SDLK_j]) {
@@ -146,10 +165,8 @@ int key() {
     } else if (keys[SDLK_r]) {
       track->clearVertices();
     }
-  } else {
-    if (keys[SDLK_ESCAPE]) {
-      return 0;
-    } else if (keys[SDLK_UP]) {
+  } else if (mode == MODE_RIDE) {
+    if (keys[SDLK_UP]) {
       camera->rotate(0,5);
     } else if (keys[SDLK_DOWN]) {
       camera->rotate(0,-5);
@@ -157,12 +174,6 @@ int key() {
       camera->rotate(5,0);
     } else if (keys[SDLK_RIGHT]) {
       camera->rotate(-5,0);
-    } else if (keys[SDLK_w]) {
-      camera->moveForward(0.5);
-    } else if (keys[SDLK_0]) {
-      debug = !debug;
-      light->indicatorOff();
-      light->moveTo(.4*scale,.4*scale,scale);
     }
   }
   // Keep the program running
@@ -185,6 +196,9 @@ void reshape(int width, int height) {
 int main() {
   int run = 1;
   double t0 = 0;
+  double x = 0;
+  double y = 0;
+  double z = 0;
   SDL_Surface* screen;
   Mix_Music* music;
 
@@ -233,9 +247,12 @@ int main() {
   track->setRailWidth(0.4);
   track->setRailHeight(0.1);
 
-  // Object test
-  object->loadFile("objects/coaster.obj");
-  object->loadTexture("textures/coasterTexture.png");
+  // Coaster Setup
+  coaster->loadFile("objects/coaster.obj");
+  coaster->loadTexture("textures/coasterTexture.png");
+  coaster->setScale(0.7);
+  coaster->moveTo(5,5,5);
+  coaster->setVelocity(20);
 
   // Setting light parameters
   light->setColor(1,1,1);
@@ -244,9 +261,6 @@ int main() {
   light->setSpecular(0.3);
   // Moving the light ontop of the sun in the skybox
   light->moveTo(.4*scale,.4*scale,scale);
-  if (debug) {
-    light->indicatorOn();
-  }
 
   // Initialize audio
   if (Mix_OpenAudio(44100,AUDIO_S16SYS,2,4096)) exit(1);
@@ -282,8 +296,13 @@ int main() {
     if (t-t0>0.05) {
       run = key();
       t0 = t;
-      if (debug) {
+      if (mode == MODE_DEBUG) {
         light->moveTo(scale*Sin(t*30),.4*scale,scale*Cos(t*30));
+      } else if (mode == MODE_RIDE or mode == MODE_PRESET) {
+        track->getIthTrackVertex(t*coaster->getVelocity(), x, y, z);
+        coaster->moveTo(x,y,z);
+        track->getIthTrackVertex((t+0.05)*coaster->getVelocity(), x, y, z);
+        coaster->rotateToFace(x,y,z);
       }
     }
     // Display
@@ -298,6 +317,7 @@ int main() {
   delete ground;
   delete cursor;
   delete track;
+  delete coaster;
   Mix_CloseAudio();
   SDL_Quit();
   return 0;

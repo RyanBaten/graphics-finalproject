@@ -71,13 +71,13 @@ bool Object::loadFile(const char* file) {
       vertexCoords.push_back(vertices.at(3*v3-1));
       // Adding the texture coordinates
       texCoords.push_back(texture_uvs.at(2*uv1-2));
-      texCoords.push_back(texture_uvs.at(2*uv1-1));
+      texCoords.push_back(1-texture_uvs.at(2*uv1-1));
 
       texCoords.push_back(texture_uvs.at(2*uv2-2));
-      texCoords.push_back(texture_uvs.at(2*uv2-1));
+      texCoords.push_back(1-texture_uvs.at(2*uv2-1));
 
       texCoords.push_back(texture_uvs.at(2*uv3-2));
-      texCoords.push_back(texture_uvs.at(2*uv3-1));
+      texCoords.push_back(1-texture_uvs.at(2*uv3-1));
       // Adding the normal coordinates
       normalCoords.push_back(normals.at(3*n1-3));
       normalCoords.push_back(normals.at(3*n1-2));

@@ -214,3 +214,14 @@ void Track::setRailTexture(std::string fn) {
 void Track::setMiddleTexture(std::string fn) {
   middleTexture = loadImage(fn.c_str());
 }
+
+void Track::getIthTrackVertex(int i, double &x, double &y, double &z) {
+  if (i > int(trackVertices.size()/24-24)) i %= trackVertices.size()/24-24;
+  // Average the vertex of the top left rail and the top right rail
+//  x = (trackVertices.at(3*i) + trackVertices.at(3*i+18))/2;
+//  y = (trackVertices.at(3*i+1) + trackVertices.at(3*i+19))/2;
+//  z = (trackVertices.at(3*i+2) + trackVertices.at(3*i+20))/2;
+  x = (trackVertices.at(24*i) + trackVertices.at(24*i+18))/2;
+  y = (trackVertices.at(24*i+1) + trackVertices.at(24*i+19))/2;
+  z = (trackVertices.at(24*i+2) + trackVertices.at(24*i+20))/2;
+}
