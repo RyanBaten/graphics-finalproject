@@ -1,5 +1,8 @@
 #include <math.h>
 #include "coaster.h"
+#include <stdio.h>
+
+#define ArcCos(x) (acos(x)*180/3.1415927)
 
 Coaster::Coaster() {
   scale = 1;
@@ -15,6 +18,12 @@ void Coaster::rotateToFace(double x, double y, double z) {
   double x_diff = x-x_location;
   double y_diff = y-y_location;
   double z_diff = z-z_location;
+  double xzdist = sqrt(x_diff*x_diff+z_diff*z_diff);
+  double dist = sqrt(x_diff*x_diff+y_diff*y_diff+z_diff*z_diff);
+  
+//  y_rotation += 5;
+  x_rotation = ArcCos((x_diff*x_diff+z_diff*z_diff)/(xzdist*dist));
+  y_rotation = ArcCos(-z_diff/xzdist);
 }
 
 void Coaster::moveTo(double x, double y, double z) {
