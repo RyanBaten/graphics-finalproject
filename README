@@ -12,7 +12,15 @@ l             move cursor right
 t             move cursor up 
 y             move cursor down 
 Enter         add point for rollercoaster
-0             enter/exit debug mode
+
+Modes:
+Key           Action
+---           ------
+1             Construction mode
+2             Coster 3rd person view
+3             Preset coaster loaded in/ 3rd person view
+4             First person follow coaster
+5             Debug mode
 
 cursor movement in debug mode is disabled
 

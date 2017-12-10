@@ -12,6 +12,8 @@ Coaster::Coaster() {
   x_rotation = 0;
   y_rotation = 0;
   z_rotation = 0;
+  min_velocity = 10;
+  max_velocity = 40;
 }
 
 void Coaster::rotateToFace(double x, double y, double z) {
@@ -44,6 +46,24 @@ void Coaster::setScale(double _scale) {
 
 void Coaster::setVelocity(double _velocity) {
   velocity = _velocity;
+}
+
+void Coaster::increaseVelocity(double _velocity) {
+  velocity += _velocity;
+  if (velocity > max_velocity) velocity = max_velocity;
+}
+
+void Coaster::decreaseVelocity(double _velocity) {
+  velocity -= _velocity;
+  if (velocity < min_velocity) velocity = min_velocity;
+}
+
+void Coaster::setMinVelocity(double _velocity) {
+  min_velocity = _velocity;
+}
+
+void Coaster::setMaxVelocity(double _velocity) {
+  max_velocity = _velocity;
 }
 
 double Coaster::getVelocity() {

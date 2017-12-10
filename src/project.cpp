@@ -138,6 +138,8 @@ int key() {
     light->moveTo(.4*scale,.4*scale,scale);
   } else if (keys[SDLK_4]) {
     mode = MODE_FOLLOW;
+    light->indicatorOff();
+    light->moveTo(.4*scale,.4*scale,scale);
   } else if (keys[SDLK_5]) {
     mode = MODE_DEBUG;
     light->indicatorOn();
@@ -172,7 +174,7 @@ int key() {
     } else if (keys[SDLK_r]) {
       track->clearVertices();
     }
-  } else if (mode == MODE_RIDE) {
+  } else {
     if (keys[SDLK_UP]) {
       camera->rotate(0,5);
     } else if (keys[SDLK_DOWN]) {
@@ -181,6 +183,10 @@ int key() {
       camera->rotate(5,0);
     } else if (keys[SDLK_RIGHT]) {
       camera->rotate(-5,0);
+    } else if (keys[SDLK_PLUS]) {
+      coaster->increaseVelocity(10);
+    } else if (keys[SDLK_MINUS]) {
+      coaster->decreaseVelocity(10);
     }
   }
   // Keep the program running
@@ -258,7 +264,9 @@ int main() {
   coaster->loadTexture("textures/coasterTexture.png");
   coaster->setScale(0.7);
   coaster->moveTo(5,5,5);
-  coaster->setVelocity(20);
+  coaster->setVelocity(30);
+  coaster->setMaxVelocity(100);
+  coaster->setMinVelocity(10);
 
   // Setting light parameters
   light->setColor(1,1,1);
