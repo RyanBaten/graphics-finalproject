@@ -217,6 +217,11 @@ void Track::setRailTexture(std::string fn) {
   railTexture = loadImage(fn.c_str());
 }
 
+bool Track::isEmpty() {
+  if (trackVertices.size() == 0) return true;
+  return false;
+}
+
 void Track::getIthTrackVertex(int i, double &x, double &y, double &z) {
   if (i > int(trackVertices.size()/24-24)) i %= trackVertices.size()/24-24;
   // Average the vertex of the top left rail and the top right rail

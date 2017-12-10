@@ -30,6 +30,7 @@ class Track {
     void setRailWidth(double w);
     void setRailHeight(double h);
     void setRailTexture(std::string fn);
+    bool isEmpty();
     void getIthTrackVertex(int i, double &x, double &y, double &z);
 };
 

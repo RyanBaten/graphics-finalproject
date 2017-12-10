@@ -25,6 +25,7 @@
 #include "cursor.h"
 #include "track.h"
 #include "coaster.h"
+#include "emitter.h"
 
 #define Cos(x) (cos((x)*3.1415927/180))
 #define Sin(x) (sin((x)*3.1415927/180))
@@ -52,6 +53,8 @@ Ground *ground = new Ground(groundSize, groundSize);
 Cursor *cursor = new Cursor();
 Track *track = new Track();
 Coaster *coaster = new Coaster();
+Emitter *fire = new Emitter();
+Emitter *lightning = new Emitter();
 
 void display() {
   // Clear color and depth buffer
@@ -90,14 +93,14 @@ void display() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_TEXTURE_2D);
     glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
-    texture_map->bindTexture("metal");
+    texture_map->bindTexture("grass");
     glColor3f(1,1,1);
     glBegin(GL_QUADS);
-    glNormal3f(0,0,1);
-    glTexCoord2f(1,1);  glVertex3f(0,20,-5);
-    glTexCoord2f(1,0);  glVertex3f(0,21,-5);
-    glTexCoord2f(0,0);  glVertex3f(1,21,-5);
-    glTexCoord2f(0,1);  glVertex3f(1,20,-5);
+      glNormal3f(0,0,1);
+      glTexCoord2f(1,1);  glVertex3f(0,20,-5);
+      glTexCoord2f(1,0);  glVertex3f(0,21,-5);
+      glTexCoord2f(0,0);  glVertex3f(1,21,-5);
+      glTexCoord2f(0,1);  glVertex3f(1,20,-5);
     glEnd();
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_BLEND);
@@ -106,11 +109,31 @@ void display() {
   if (mode == MODE_CONSTRUCT) {
     cursor->draw();
   }
+  // Disable lighting
+  glDisable(GL_LIGHTING);
+  // Draw Particles
+  fire->draw();
+  // Draw HUD
+  if (mode != MODE_CONSTRUCT) {
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+    texture_map->bindTexture("hud");
+    glWindowPos2i(0,0);
+    glBegin(GL_QUADS);
+      glVertex3f(0,0,0);
+      glVertex3f(0,1,0);
+      glVertex3f(1,1,0);
+      glVertex3f(1,0,0);
+    glEnd();
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_BLEND);
+  }
   // Disables
   glDisable(GL_TEXTURE_2D);
   glDisable(GL_FOG);
   glDisable(GL_DEPTH_TEST);
-  glDisable(GL_LIGHTING);
   glDisable(GL_COLOR_MATERIAL);
   // Render scene and make it visible
   glFlush();
@@ -232,6 +255,7 @@ int main() {
 
   // Initialize texture map
   texture_map->addTexture("grass", "textures/grass.png");
+  texture_map->addTexture("hud", "textures/hud.png");
 
   // Set up skybox
   skybox->setNTexture("textures/skybox_n.png");
@@ -284,6 +308,17 @@ int main() {
   // Play music
   Mix_PlayMusic(music,-1);
 
+  // Set up emitters
+  fire->setRate(0.05);
+  fire->setTime(SDL_GetTicks()/1000.0);
+  fire->loadTexture("textures/fire.png");
+  fire->setLocation(5,5,5);
+  fire->setBreadth(2);
+  fire->setLifetime(75);
+  fire->setVelocity(0.006);
+  fire->setSize(30);
+  fire->turnOn();
+
   // SDL event loop
   while (run) {
     double t = SDL_GetTicks()/1000.0;
@@ -310,9 +345,10 @@ int main() {
     if (t-t0>0.05) {
       run = key();
       t0 = t;
+      fire->update(t);
       if (mode == MODE_DEBUG) {
         light->moveTo(scale*Sin(t*30),.4*scale,scale*Cos(t*30));
-      } else if (mode != MODE_CONSTRUCT) {
+      } else if (mode != MODE_CONSTRUCT && !track->isEmpty()) {
         track->getIthTrackVertex(t*coaster->getVelocity(), x, y, z);
         coaster->rotateToFace(x,y,z);
         coaster->moveTo(x,y,z);
@@ -335,6 +371,8 @@ int main() {
   delete cursor;
   delete track;
   delete coaster;
+  delete fire;
+  delete lightning;
   Mix_CloseAudio();
   SDL_Quit();
   return 0;
