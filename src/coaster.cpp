@@ -22,11 +22,14 @@ void Coaster::rotateToFace(double x, double y, double z) {
   double z2 = z_diff*z_diff;
   double xzdist = sqrt(x2+z2);
   double dist = sqrt(x2+y_diff*y_diff+z2);
-  if (dist == 0) return;
-  if (xzdist == 0) return;
-  
-  y_rotation = ArcCos(-x_diff/dist)*(z_diff<0?-1:1);
-  z_rotation = ArcCos((x2+z2)/(xzdist*dist))*(y_diff<0?-1:1);
+  double y_calc = -x_diff/dist;
+  double z_calc = (x2+z2)/(xzdist*dist);
+  if (y_calc>1) y_calc=1;
+  if (y_calc<-1) y_calc=-1;
+  if (z_calc>1) z_calc=1;
+  if (z_calc<-1) z_calc=-1;
+  y_rotation = ArcCos(y_calc)*(z_diff<0?-1:1);
+  z_rotation = ArcCos(z_calc)*(y_diff<0?1:-1);
 }
 
 void Coaster::moveTo(double x, double y, double z) {

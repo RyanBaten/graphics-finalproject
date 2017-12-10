@@ -36,7 +36,7 @@ double fov = 55; // Field of view
 double asp = 1; // Aspect ratio
 double dim = 16; // Size of world
 double scale = 70; // Scale of skybox and ground
-double groundSize = 100; // Number of rows/cols in the ground matrix
+double groundSize = 70; // Number of rows/cols in the ground matrix
 const GLfloat fogColor[4] = {1.0,1.0,1.0,1.0}; // Color of fog
 
 Camera *camera = new Camera();
@@ -299,9 +299,8 @@ int main() {
         light->moveTo(scale*Sin(t*30),.4*scale,scale*Cos(t*30));
       } else if (mode != MODE_CONSTRUCT) {
         track->getIthTrackVertex(t*coaster->getVelocity(), x, y, z);
-        coaster->moveTo(x,y,z);
-        track->getIthTrackVertex((t+0.05)*coaster->getVelocity(), x, y, z);
         coaster->rotateToFace(x,y,z);
+        coaster->moveTo(x,y,z);
       }
     }
     // Display
