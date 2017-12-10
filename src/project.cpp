@@ -1,3 +1,6 @@
+// Ryan Baten
+// Computer graphics project
+
 // Used ex21 sdl as a reference for use of sdl and opengl together
 
 #include <SDL/SDL.h>
@@ -29,14 +32,16 @@
 #define MODE_CONSTRUCT 1
 #define MODE_RIDE 2
 #define MODE_PRESET 3
-#define MODE_DEBUG 4
+#define MODE_FOLLOW 4
+#define MODE_DEBUG 5
 
 int mode = 1; // Modes: 1 Construction, 2 Riding, 3 Preset Track, 4 debug
 double fov = 55; // Field of view
 double asp = 1; // Aspect ratio
 double dim = 16; // Size of world
 double scale = 70; // Scale of skybox and ground
-double groundSize = 70; // Number of rows/cols in the ground matrix
+double groundSize = 100; // Number of rows/cols in the ground matrix
+double cameraViewHeight = 1.8; // Height of camera above coaster in first person mode
 const GLfloat fogColor[4] = {1.0,1.0,1.0,1.0}; // Color of fog
 
 Camera *camera = new Camera();
@@ -132,6 +137,8 @@ int key() {
     light->indicatorOff();
     light->moveTo(.4*scale,.4*scale,scale);
   } else if (keys[SDLK_4]) {
+    mode = MODE_FOLLOW;
+  } else if (keys[SDLK_5]) {
     mode = MODE_DEBUG;
     light->indicatorOn();
   } else if (mode == MODE_CONSTRUCT) {
@@ -301,6 +308,10 @@ int main() {
         track->getIthTrackVertex(t*coaster->getVelocity(), x, y, z);
         coaster->rotateToFace(x,y,z);
         coaster->moveTo(x,y,z);
+        if (mode == MODE_FOLLOW) {
+          camera->setViewLocation(x,y+cameraViewHeight,z);
+          camera->moveTo(x,y+cameraViewHeight,z);
+        }
       }
     }
     // Display
