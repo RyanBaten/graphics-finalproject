@@ -13,45 +13,51 @@ void Track::draw() {
   int iterations = trackVertices.size()-24;
   int norm = 0;
 
-//  glEnable(GL_TEXTURE_2D);
-//  glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
   glPushMatrix();
+  glEnable(GL_TEXTURE_2D);
+  glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+  glBindTexture(GL_TEXTURE_2D, railTexture);
+  glEnable(GL_NORMALIZE);
   // Draw Railing
-  glColor3f(1.0,1.0,1.0);
   glBegin(GL_QUADS);
     for (int i=0; i<iterations; i+=12) {
       // Top
       glNormal3f(normals.at(norm+6), normals.at(norm+7), normals.at(norm+8));
+      glVertex3f(trackVertices.at(i+6),trackVertices.at(i+7),trackVertices.at(i+8));
       glVertex3f(trackVertices.at(i),trackVertices.at(i+1),trackVertices.at(i+2));
+      glNormal3f(normals.at(norm+18), normals.at(norm+19), normals.at(norm+20));
       glVertex3f(trackVertices.at(i+24),trackVertices.at(i+25),trackVertices.at(i+26));
       glVertex3f(trackVertices.at(i+30),trackVertices.at(i+31),trackVertices.at(i+32));
-      glVertex3f(trackVertices.at(i+6),trackVertices.at(i+7),trackVertices.at(i+8));
       // Bottom
       glNormal3f(normals.at(norm+9), normals.at(norm+10), normals.at(norm+11));
+      glVertex3f(trackVertices.at(i+9),trackVertices.at(i+10),trackVertices.at(i+11));
       glVertex3f(trackVertices.at(i+3),trackVertices.at(i+4),trackVertices.at(i+5));
+      glNormal3f(normals.at(norm+21), normals.at(norm+22), normals.at(norm+23));
       glVertex3f(trackVertices.at(i+27),trackVertices.at(i+28),trackVertices.at(i+29));
       glVertex3f(trackVertices.at(i+33),trackVertices.at(i+34),trackVertices.at(i+35));
-      glVertex3f(trackVertices.at(i+9),trackVertices.at(i+10),trackVertices.at(i+11));
       // Left Side
       glNormal3f(normals.at(norm), normals.at(norm+1), normals.at(norm+2));
+      glVertex3f(trackVertices.at(i),trackVertices.at(i+1),trackVertices.at(i+2));
       glVertex3f(trackVertices.at(i+3),trackVertices.at(i+4),trackVertices.at(i+5));
+      glNormal3f(normals.at(norm+12), normals.at(norm+13), normals.at(norm+14));
       glVertex3f(trackVertices.at(i+27),trackVertices.at(i+28),trackVertices.at(i+29));
       glVertex3f(trackVertices.at(i+24),trackVertices.at(i+25),trackVertices.at(i+26));
-      glVertex3f(trackVertices.at(i),trackVertices.at(i+1),trackVertices.at(i+2));
       // Right Side
       glNormal3f(normals.at(norm+3), normals.at(norm+4), normals.at(norm+5));
+      glVertex3f(trackVertices.at(i+9),trackVertices.at(i+10),trackVertices.at(i+11));
       glVertex3f(trackVertices.at(i+6),trackVertices.at(i+7),trackVertices.at(i+8));
+      glNormal3f(normals.at(norm+15), normals.at(norm+16), normals.at(norm+17));
       glVertex3f(trackVertices.at(i+30),trackVertices.at(i+31),trackVertices.at(i+32));
       glVertex3f(trackVertices.at(i+33),trackVertices.at(i+34),trackVertices.at(i+35));
-      glVertex3f(trackVertices.at(i+9),trackVertices.at(i+10),trackVertices.at(i+11));
       // Iterate on normals
-      if (!i%2) {
+      if ((i/12)%2 == 1) {
         norm += 12;
       }
     }
   glEnd();
   glPopMatrix();
-//  glDisable(GL_TEXTURE_2D);
+  glDisable(GL_TEXTURE_2D);
+  glDisable(GL_NORMALIZE);
 }
  
 void Track::clearVertices() {
@@ -171,21 +177,21 @@ void Track::generateTrack(double smoothness) {
         // Since the side normals are used in generating the trackVertices,
         // put them in the vector first before finding the up and down vectors
           // Left
-          normals.push_back(side_norm_z);
+          normals.push_back(diff_z);
           normals.push_back(0);
-          normals.push_back(-side_norm_x);
+          normals.push_back(-diff_x);
           // Right
-          normals.push_back(-side_norm_z);
+          normals.push_back(-diff_z);
           normals.push_back(0);
-          normals.push_back(side_norm_x);
+          normals.push_back(diff_x);
           // Up
-          normals.push_back(diff_y*diff_x);
-          normals.push_back(-diff_x*diff_x-diff_z*diff_z);
-          normals.push_back(diff_y*diff_z);
-          // Down
           normals.push_back(-diff_y*diff_x);
           normals.push_back(diff_x*diff_x+diff_z*diff_z);
           normals.push_back(-diff_y*diff_z);
+          // Down
+          normals.push_back(diff_y*diff_x);
+          normals.push_back(-diff_x*diff_x-diff_z*diff_z);
+          normals.push_back(diff_y*diff_z);
         // Update Last values
         last_x = result_x;
         last_y = result_y;
@@ -211,16 +217,9 @@ void Track::setRailTexture(std::string fn) {
   railTexture = loadImage(fn.c_str());
 }
 
-void Track::setMiddleTexture(std::string fn) {
-  middleTexture = loadImage(fn.c_str());
-}
-
 void Track::getIthTrackVertex(int i, double &x, double &y, double &z) {
   if (i > int(trackVertices.size()/24-24)) i %= trackVertices.size()/24-24;
   // Average the vertex of the top left rail and the top right rail
-//  x = (trackVertices.at(3*i) + trackVertices.at(3*i+18))/2;
-//  y = (trackVertices.at(3*i+1) + trackVertices.at(3*i+19))/2;
-//  z = (trackVertices.at(3*i+2) + trackVertices.at(3*i+20))/2;
   x = (trackVertices.at(24*i) + trackVertices.at(24*i+18))/2;
   y = (trackVertices.at(24*i+1) + trackVertices.at(24*i+19))/2;
   z = (trackVertices.at(24*i+2) + trackVertices.at(24*i+20))/2;

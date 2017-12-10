@@ -14,7 +14,6 @@
 class Track {
   private:
     GLuint railTexture;
-    GLuint middleTexture;
     double trackWidth;
     double railWidth;
     double railHeight;
@@ -31,7 +30,6 @@ class Track {
     void setRailWidth(double w);
     void setRailHeight(double h);
     void setRailTexture(std::string fn);
-    void setMiddleTexture(std::string fn);
     void getIthTrackVertex(int i, double &x, double &y, double &z);
 };
 

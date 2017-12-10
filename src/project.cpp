@@ -85,7 +85,7 @@ void display() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_TEXTURE_2D);
     glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
-    texture_map->bindTexture("tree");
+    texture_map->bindTexture("metal");
     glColor3f(1,1,1);
     glBegin(GL_QUADS);
     glNormal3f(0,0,1);
@@ -218,9 +218,7 @@ int main() {
   camera->setViewLocation(5,5,10);
 
   // Initialize texture map
-  texture_map->addTexture("wood", "textures/wood.png");
   texture_map->addTexture("grass", "textures/grass.png");
-  texture_map->addTexture("tree", "textures/tree.png");
 
   // Set up skybox
   skybox->setNTexture("textures/skybox_n.png");
@@ -246,6 +244,7 @@ int main() {
   track->setTrackWidth(1);
   track->setRailWidth(0.4);
   track->setRailHeight(0.1);
+  track->setRailTexture("textures/metal.png");
 
   // Coaster Setup
   coaster->loadFile("objects/coaster.obj");
