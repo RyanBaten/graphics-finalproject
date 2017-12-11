@@ -4,7 +4,15 @@
 #include "object.h"
 #include "load_image.h"
 
-Object::Object() {}
+Object::Object() {
+  scale = 1;
+  x_location = 0;
+  y_location = 0;
+  z_location = 0;
+  x_rotation = 0;
+  y_rotation = 0;
+  z_rotation = 0;
+}
 
 // Used openGL tutorial at http://www.opengl-tutorial.org/beginners-tutorials/tutorial-7-model-loading/ as reference for object loading
 bool Object::loadFile(const char* file) {
@@ -100,15 +108,31 @@ void Object::loadTexture(const char* file) {
   texture = loadImage(file);
 }
 
-void Object::draw(double x, double y, double z, double rx, double ry, double rz, double scale) {
+void Object::moveTo(double x, double y, double z) {
+  x_location = x;
+  y_location = y;
+  z_location = z;
+}
+
+void Object::rotate(double x, double y, double z) {
+  x_rotation += x;
+  y_rotation += y;
+  z_rotation += z;
+}
+
+void Object::setScale(double _scale) {
+  scale = _scale;
+}
+
+void Object::draw() {
   int iterations = vertexCoords.size()/3;
 
   glPushMatrix();
   // Translation and scaling
-  glTranslated(x,y,z);
-  glRotated(rx,1,0,0);
-  glRotated(ry,0,1,0);
-  glRotated(rz,0,0,1);
+  glTranslated(x_location,y_location,z_location);
+  glRotated(x_rotation,1,0,0);
+  glRotated(y_rotation,0,1,0);
+  glRotated(z_rotation,0,0,1);
   glScaled(scale,scale,scale);
 
   glEnable(GL_TEXTURE_2D);

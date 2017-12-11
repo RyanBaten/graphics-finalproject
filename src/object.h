@@ -13,6 +13,9 @@
 
 class Object {
   protected:
+    double scale;
+    double x_location, y_location, z_location;
+    double x_rotation, y_rotation, z_rotation;
     GLuint texture;
     std::vector<double> vertexCoords;
     std::vector<double> normalCoords;
@@ -21,7 +24,10 @@ class Object {
     Object();
     bool loadFile(const char* file);
     void loadTexture(const char* file);
-    void draw(double x, double y, double z, double rx, double ry, double rz, double scale);
+    void moveTo(double x, double y, double z);
+    void rotate(double x, double y, double z);
+    void setScale(double _scale);
+    void draw();
 };
 
 #endif

@@ -3,6 +3,7 @@
 #include "load_image.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #define pi 3.14159265
 
@@ -222,10 +223,54 @@ bool Track::isEmpty() {
   return false;
 }
 
-void Track::getIthTrackVertex(int i, double &x, double &y, double &z) {
+int Track::getIthTrackVertex(int i, double &x, double &y, double &z) {
   if (i > int(trackVertices.size()/24-24)) i %= trackVertices.size()/24-24;
   // Average the vertex of the top left rail and the top right rail
   x = (trackVertices.at(24*i) + trackVertices.at(24*i+18))/2;
   y = (trackVertices.at(24*i+1) + trackVertices.at(24*i+19))/2;
   z = (trackVertices.at(24*i+2) + trackVertices.at(24*i+20))/2;
+  return i;
+}
+
+void Track::exportTrack(const char* file) {
+  int iterations;
+  std::string line;
+  FILE* outfile = fopen(file, "w");
+  if (!outfile) return;
+
+  iterations = trackVertices.size();
+  for (int i=0; i<iterations; i++) {
+    fprintf(outfile, "T %f\n", trackVertices.at(i));
+  }
+
+  iterations = normals.size();
+  for (int i=0; i<iterations; i++) {
+    fprintf(outfile, "N %f\n", normals.at(i));
+  }
+  fclose(outfile);
+}
+
+int Track::loadTrackFile(const char* file) {
+  double value;
+  FILE* infile = fopen(file, "r");
+  char buff[128];
+  if (!infile) return 1;
+  clearVertices();
+
+  while (fscanf(infile, "%s", buff)!=EOF) {
+    if (!strcmp(buff, "T")) {
+      if (fscanf(infile, "%lf\n", &value) != 1) {
+        fprintf(stderr, "Failed to parse file %s\n", file);
+        return 1;
+      }
+      trackVertices.push_back(value);
+    } else if (!strcmp(buff, "N")) {
+      if (fscanf(infile, "%lf\n", &value) != 1) {
+        fprintf(stderr, "Failed to parse file %s\n", file);
+        return 1;
+      }
+      normals.push_back(value);
+    }
+  }
+  return 0;
 }

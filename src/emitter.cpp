@@ -23,7 +23,8 @@ bool Emitter::isOn() {
   return on;
 }
 
-void Emitter::turnOn() {
+void Emitter::turnOn(double time) {
+  offtime = time;
   on = true;
 }
 
@@ -36,6 +37,10 @@ void Emitter::loadTexture(std::string fn) {
 }
 
 // Used to draw the particles themselves
+// Point sprite basics:
+// http://www.informit.com/articles/article.aspx?p=770639&seqNum=7
+// Explanation for disabling z buffer:
+// https://www.opengl.org/discussion_boards/showthread.php/148843-Polygon-offset-on-light-points
 void Emitter::draw() {
   if (!isOn()) return;
   int iterations = particles.size();
@@ -61,6 +66,7 @@ void Emitter::draw() {
       glVertex3f(x,y,z);
     }
   glEnd();
+  // Disables
   glDepthMask(GL_TRUE);
   glDisable(GL_BLEND);
   glDisable(GL_POINT_SPRITE);
@@ -103,8 +109,16 @@ void Emitter::update(double t) {
   double velocity_rand;
   int iterations = particles.size();
   std::vector<int> deaths;
+  // Figure out if the emitter is on or off
+  if (offtime < t) {
+    on = false;
+    // Kill all particles
+    for (int i=0; i<iterations; i++) {
+      particles.at(i)->setLifetime(0);
+    }
+  }
   // Addition of new particles
-  if (t-last_t>rate) {
+  if (t-last_t>rate && on) {
     particle_count = (t-last_t)/rate;
     for (int i=0; i<particle_count; i++) {
       // Want variation in lifetime so allow the second half of lifetime to be random

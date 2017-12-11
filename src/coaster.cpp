@@ -5,13 +5,6 @@
 #define ArcCos(x) (acos(x)*180/3.1415927)
 
 Coaster::Coaster() {
-  scale = 1;
-  x_location = 0;
-  y_location = 0;
-  z_location = 0;
-  x_rotation = 0;
-  y_rotation = 0;
-  z_rotation = 0;
   min_velocity = 10;
   max_velocity = 40;
 }
@@ -32,12 +25,6 @@ void Coaster::rotateToFace(double x, double y, double z) {
   if (z_calc<-1) z_calc=-1;
   y_rotation = ArcCos(y_calc)*(z_diff<0?-1:1);
   z_rotation = ArcCos(z_calc)*(y_diff<0?1:-1);
-}
-
-void Coaster::moveTo(double x, double y, double z) {
-  x_location = x;
-  y_location = y;
-  z_location = z;
 }
 
 void Coaster::setScale(double _scale) {
@@ -71,6 +58,6 @@ double Coaster::getVelocity() {
 }
 
 void Coaster::draw() {
-  // Pass in the coaster's variables to the object class draw function
-  Object::draw(x_location, y_location, z_location, x_rotation, y_rotation, z_rotation, scale);
+  // Call the object class draw function
+  Object::draw();
 }

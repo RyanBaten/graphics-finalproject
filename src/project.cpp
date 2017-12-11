@@ -26,6 +26,8 @@
 #include "track.h"
 #include "coaster.h"
 #include "emitter.h"
+#include "forest.h"
+#include "printsdl.h"
 
 #define Cos(x) (cos((x)*3.1415927/180))
 #define Sin(x) (sin((x)*3.1415927/180))
@@ -37,6 +39,8 @@
 #define MODE_DEBUG 5
 
 int mode = 1; // Modes: 1 Construction, 2 Riding, 3 Preset Track, 4 debug
+double width = 1000; // Screen Width
+double height = 800; // Screen Height
 double fov = 55; // Field of view
 double asp = 1; // Aspect ratio
 double dim = 16; // Size of world
@@ -55,6 +59,7 @@ Track *track = new Track();
 Coaster *coaster = new Coaster();
 Emitter *fire = new Emitter();
 Emitter *lightning = new Emitter();
+Forest *forest = new Forest();
 
 void display() {
   // Clear color and depth buffer
@@ -84,6 +89,8 @@ void display() {
   track->draw();
   // Draw ground
   ground->draw(-scale,0,-scale);
+  // Draw forest
+  forest->draw();
   // Draw coaster
   if (mode != MODE_CONSTRUCT) coaster->draw();
   // Draw everything
@@ -113,22 +120,13 @@ void display() {
   glDisable(GL_LIGHTING);
   // Draw Particles
   fire->draw();
-  // Draw HUD
+  lightning->draw();
+  // Display Velocity
   if (mode != MODE_CONSTRUCT) {
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_TEXTURE_2D);
-    glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
-    texture_map->bindTexture("hud");
-    glWindowPos2i(0,0);
-    glBegin(GL_QUADS);
-      glVertex3f(0,0,0);
-      glVertex3f(0,1,0);
-      glVertex3f(1,1,0);
-      glVertex3f(1,0,0);
-    glEnd();
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_BLEND);
+    glColor3f(0.7,0.7,0.7);
+    glWindowPos2i(5,5);
+    Print("Velocity: %f\n", coaster->getVelocity());
+    glColor3f(1,1,1);
   }
   // Disables
   glDisable(GL_TEXTURE_2D);
@@ -140,77 +138,99 @@ void display() {
   SDL_GL_SwapBuffers();
 }
 
-int key() {
-  Uint8* keys = SDL_GetKeyState(NULL);
-//  int shift = SDL_GetModState()&KMOD_SHIFT;
-  // Exit on ESC
-  if (keys[SDLK_ESCAPE]) {
-    return 0;
-  // Mode Switching 
-  } else if (keys[SDLK_1]) {
-    mode = MODE_CONSTRUCT;
-    light->indicatorOff();
-    light->moveTo(.4*scale,.4*scale,scale);
-  } else if (keys[SDLK_2]) {
-    mode = MODE_RIDE;
-    light->indicatorOff();
-    light->moveTo(.4*scale,.4*scale,scale);
-  } else if (keys[SDLK_3]) {
-    mode = MODE_PRESET;
-    light->indicatorOff();
-    light->moveTo(.4*scale,.4*scale,scale);
-  } else if (keys[SDLK_4]) {
-    mode = MODE_FOLLOW;
-    light->indicatorOff();
-    light->moveTo(.4*scale,.4*scale,scale);
-  } else if (keys[SDLK_5]) {
-    mode = MODE_DEBUG;
-    light->indicatorOn();
-  } else if (mode == MODE_CONSTRUCT) {
-    if (keys[SDLK_UP]) {
+int key(SDL_Event event) {
+  // I wanted to find a more efficient way of doing this than a massive if statement
+  // Lazyfoo SDL 1.2 tutorial page shows usage of a switch
+  // http://lazyfoo.net/tutorials/SDL/04_key_presses/index.php
+  switch (event.key.keysym.sym) {
+    case SDLK_ESCAPE:
+      return 0;
+      break;
+    case SDLK_1:
+      mode = MODE_CONSTRUCT;
+      light->indicatorOff();
+      light->moveTo(.4*scale,.4*scale,scale);
+      break;
+    case SDLK_2:
+      mode = MODE_RIDE;
+      light->indicatorOff();
+      light->moveTo(.4*scale,.4*scale,scale);
+      break;
+    case SDLK_3:
+      mode = MODE_PRESET;
+      track->loadTrackFile("tracks/sampleTrack.track");
+      light->indicatorOff();
+      light->moveTo(.4*scale,.4*scale,scale);
+      break;
+    case SDLK_4:
+      mode = MODE_FOLLOW;
+      light->indicatorOff();
+      light->moveTo(.4*scale,.4*scale,scale);
+      break;
+    case SDLK_5:
+      mode = MODE_DEBUG;
+      light->indicatorOn();
+      break;
+    case SDLK_UP:
       camera->rotate(0,5);
-    } else if (keys[SDLK_DOWN]) {
+      break;
+    case SDLK_DOWN:
       camera->rotate(0,-5);
-    } else if (keys[SDLK_LEFT]) {
+      break;
+    case SDLK_LEFT:
       camera->rotate(5,0);
-    } else if (keys[SDLK_RIGHT]) {
+      break;
+    case SDLK_RIGHT:
       camera->rotate(-5,0);
-    } else if (keys[SDLK_w]) {
-      camera->moveForward(0.5);
-    } else if (keys[SDLK_i]) {
-      cursor->move(0.5,0,0);
-    } else if (keys[SDLK_j]) {
-      cursor->move(0,0,-0.5);
-    } else if (keys[SDLK_k]) {
-      cursor->move(-0.5,0,0);
-    } else if (keys[SDLK_l]) {
-      cursor->move(0,0,0.5);
-    } else if (keys[SDLK_t]) {
-      cursor->move(0,0.5,0);
-    } else if (keys[SDLK_y]) {
-      cursor->move(0,-0.5,0);
-    } else if (keys[SDLK_RETURN]) {
-      double x,y,z;
-      cursor->getLocation(x,y,z);
-      track->addVertex(x,y,z);
-      track->generateTrack(0.1);
-    } else if (keys[SDLK_r]) {
-      track->clearVertices();
-    }
-  } else {
-    if (keys[SDLK_UP]) {
-      camera->rotate(0,5);
-    } else if (keys[SDLK_DOWN]) {
-      camera->rotate(0,-5);
-    } else if (keys[SDLK_LEFT]) {
-      camera->rotate(5,0);
-    } else if (keys[SDLK_RIGHT]) {
-      camera->rotate(-5,0);
-    } else if (keys[SDLK_PLUS]) {
-      coaster->increaseVelocity(10);
-    } else if (keys[SDLK_MINUS]) {
-      coaster->decreaseVelocity(10);
-    }
+      break;
+    case SDLK_b:
+      track->exportTrack("yourTrack.track");
+      break;
+    case SDLK_w:
+      if (mode == MODE_CONSTRUCT) camera->moveForward(0.5);
+      else {
+        coaster->increaseVelocity(1);
+        fire->turnOn(SDL_GetTicks()/1000.0 +2);
+      }
+      break;
+    case SDLK_s:
+      if (mode == MODE_CONSTRUCT) camera->moveForward(-0.5);
+      else {
+        coaster->decreaseVelocity(1);
+        lightning->turnOn(SDL_GetTicks()/1000.0 +2);
+      }
+      break;
+    case SDLK_i:
+      if (mode == MODE_CONSTRUCT) cursor->move(0.5,0,0);
+      break;
+    case SDLK_j:
+      if (mode == MODE_CONSTRUCT) cursor->move(0,0,-0.5);
+      break;
+    case SDLK_k:
+      if (mode == MODE_CONSTRUCT) cursor->move(-0.5,0,0);
+      break;
+    case SDLK_l:
+      if (mode == MODE_CONSTRUCT) cursor->move(0,0,0.5);
+      break;
+    case SDLK_t:
+      if (mode == MODE_CONSTRUCT) cursor->move(0,0.5,0);
+      break;
+    case SDLK_y:
+      if (mode == MODE_CONSTRUCT) cursor->move(0,-0.5,0);
+      break;
+    case SDLK_r:
+      if (mode == MODE_CONSTRUCT) track->clearVertices();
+      break;
+    case SDLK_RETURN:
+      if (mode == MODE_CONSTRUCT) {
+        double x,y,z;
+        cursor->getLocation(x,y,z);
+        track->addVertex(x,y,z);
+        track->generateTrack(0.1);
+      }
+      break;
+    default:
+    break;
   }
   // Keep the program running
   return 1;
@@ -231,6 +251,7 @@ void reshape(int width, int height) {
 
 int main() {
   int run = 1;
+  int last_track_vert = 0;
   double t0 = 0;
   double x = 0;
   double y = 0;
@@ -241,13 +262,22 @@ int main() {
   // Initialize SDL
   SDL_Init(SDL_INIT_VIDEO);
   // Set window size, allow resizing and ask for double buffering
-  screen = SDL_SetVideoMode(1000,800,0,SDL_OPENGL|SDL_RESIZABLE|SDL_DOUBLEBUF);
+  screen = SDL_SetVideoMode(width,height,0,SDL_OPENGL|SDL_RESIZABLE|SDL_DOUBLEBUF);
   if (!screen) {
     fprintf(stderr, "Could not initialize SDL screen");
   }
   SDL_WM_SetCaption("Project","project");
   // Set screen size
   reshape(screen->w, screen->h);
+
+  // Enable key repeating 
+  // Needed this because I wanted to switch my huge if statement
+  // to a switch statement and only do key handling when key pressed
+  // https://gamedev.stackexchange.com/questions/19571/how-can-i-process-continuously-held-keys-with-sdl
+  if (SDL_EnableKeyRepeat(100, 5) == -1) {
+    printf("SDL Key repeat failed to be set\n");
+    return 1;
+  }
 
   // Set up camera
   camera->moveTo(0,10,0);
@@ -288,9 +318,13 @@ int main() {
   coaster->loadTexture("textures/coasterTexture.png");
   coaster->setScale(0.7);
   coaster->moveTo(5,5,5);
-  coaster->setVelocity(30);
-  coaster->setMaxVelocity(100);
-  coaster->setMinVelocity(10);
+  coaster->setVelocity(5);
+  coaster->setMaxVelocity(10);
+  coaster->setMinVelocity(1);
+
+  // Set up Forest
+  forest->setEdges(-scale/2,scale/2,-scale/2,scale/2, 0);
+  forest->generateTrees(50);
 
   // Setting light parameters
   light->setColor(1,1,1);
@@ -309,15 +343,29 @@ int main() {
   Mix_PlayMusic(music,-1);
 
   // Set up emitters
-  fire->setRate(0.05);
+  fire->setRate(0.01);
   fire->setTime(SDL_GetTicks()/1000.0);
   fire->loadTexture("textures/fire.png");
   fire->setLocation(5,5,5);
   fire->setBreadth(2);
-  fire->setLifetime(75);
+  fire->setLifetime(40);
   fire->setVelocity(0.006);
   fire->setSize(30);
-  fire->turnOn();
+
+  lightning->setRate(0.1);
+  lightning->setTime(SDL_GetTicks()/1000.0);
+  lightning->loadTexture("textures/lightning.png");
+  lightning->setLocation(5,10,5);
+  lightning->setBreadth(2);
+  lightning->setLifetime(40);
+  lightning->setVelocity(0.01);
+  lightning->setSize(20);
+
+  // Test particles for debugging purposes
+  if (mode == MODE_DEBUG) {
+    lightning->turnOn(SDL_GetTicks()/1000.0 + 5);
+    fire->turnOn(SDL_GetTicks()/1000.0 + 5);
+  }
 
   // SDL event loop
   while (run) {
@@ -333,7 +381,7 @@ int main() {
           run = 0;
           break;
         case SDL_KEYDOWN:
-          run = key();
+          run = key(event);
           t0 = t+0.5; // Wait before repeating
           break;
         default:
@@ -343,15 +391,18 @@ int main() {
     }
     // Repeat key every 50 ms
     if (t-t0>0.05) {
-      run = key();
+//      run = key();
       t0 = t;
       fire->update(t);
+      lightning->update(t);
       if (mode == MODE_DEBUG) {
         light->moveTo(scale*Sin(t*30),.4*scale,scale*Cos(t*30));
       } else if (mode != MODE_CONSTRUCT && !track->isEmpty()) {
-        track->getIthTrackVertex(t*coaster->getVelocity(), x, y, z);
+        last_track_vert = track->getIthTrackVertex(last_track_vert + coaster->getVelocity(), x, y, z);
         coaster->rotateToFace(x,y,z);
         coaster->moveTo(x,y,z);
+        fire->setLocation(x,y,z);
+        lightning->setLocation(x,y,z);
         if (mode == MODE_FOLLOW) {
           camera->setViewLocation(x,y+cameraViewHeight,z);
           camera->moveTo(x,y+cameraViewHeight,z);
@@ -373,6 +424,7 @@ int main() {
   delete coaster;
   delete fire;
   delete lightning;
+  delete forest;
   Mix_CloseAudio();
   SDL_Quit();
   return 0;

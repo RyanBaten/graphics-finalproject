@@ -23,12 +23,13 @@ class Emitter {
     double lifetime;
     double velocity;
     double breadth;
+    double offtime;
     std::vector<Particle*> particles;
   public:
     Emitter();
     ~Emitter();
     bool isOn();
-    void turnOn();
+    void turnOn(double t);
     void turnOff();
     void loadTexture(std::string fn);
     void draw();

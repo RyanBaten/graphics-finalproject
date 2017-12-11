@@ -31,7 +31,9 @@ class Track {
     void setRailHeight(double h);
     void setRailTexture(std::string fn);
     bool isEmpty();
-    void getIthTrackVertex(int i, double &x, double &y, double &z);
+    int getIthTrackVertex(int i, double &x, double &y, double &z);
+    void exportTrack(const char* file);
+    int loadTrackFile(const char* file);
 };
 
 #endif
