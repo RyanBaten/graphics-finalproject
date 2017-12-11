@@ -19,7 +19,6 @@
 
 #include "camera.h"
 #include "light.h"
-#include "texturemap.h"
 #include "skybox.h"
 #include "ground.h"
 #include "cursor.h"
@@ -50,7 +49,6 @@ double cameraViewHeight = 1.8; // Height of camera above coaster in first person
 const GLfloat fogColor[4] = {1.0,1.0,1.0,1.0}; // Color of fog
 
 Camera *camera = new Camera();
-TextureMap *texture_map = new TextureMap();
 Light *light = new Light(GL_LIGHT0);
 SkyBox *skybox = new SkyBox(scale);
 Ground *ground = new Ground(groundSize, groundSize);
@@ -93,25 +91,6 @@ void display() {
   forest->draw();
   // Draw coaster
   if (mode != MODE_CONSTRUCT) coaster->draw();
-  // Draw everything
-  if (mode == MODE_DEBUG) {
-    // Draw a quad to test out textures on
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_TEXTURE_2D);
-    glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
-    texture_map->bindTexture("grass");
-    glColor3f(1,1,1);
-    glBegin(GL_QUADS);
-      glNormal3f(0,0,1);
-      glTexCoord2f(1,1);  glVertex3f(0,20,-5);
-      glTexCoord2f(1,0);  glVertex3f(0,21,-5);
-      glTexCoord2f(0,0);  glVertex3f(1,21,-5);
-      glTexCoord2f(0,1);  glVertex3f(1,20,-5);
-    glEnd();
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_BLEND);
-  }
   // Draw cursor
   if (mode == MODE_CONSTRUCT) {
     cursor->draw();
@@ -147,12 +126,15 @@ int key(SDL_Event event) {
       return 0;
       break;
     case SDLK_1:
+      if (mode == MODE_PRESET) {
+        track->clearVertices();
+        camera->moveTo(0,10,0);
+        camera->setViewLocation(5,5,10);
+        cursor->setLocation(5,5,10);
+      }
       mode = MODE_CONSTRUCT;
       light->indicatorOff();
       light->moveTo(.4*scale,.4*scale,scale);
-      if (mode == MODE_PRESET) {
-        track->clear();
-      }
       break;
     case SDLK_2:
       mode = MODE_RIDE;
@@ -286,10 +268,6 @@ int main() {
   camera->moveTo(0,10,0);
   camera->setViewLocation(5,5,10);
 
-  // Initialize texture map
-  texture_map->addTexture("grass", "textures/grass.png");
-  texture_map->addTexture("hud", "textures/hud.png");
-
   // Set up skybox
   skybox->setNTexture("textures/skybox_n.png");
   skybox->setSTexture("textures/skybox_s.png");
@@ -421,7 +399,6 @@ int main() {
     SDL_Delay(5);
   }
   delete camera;
-  delete texture_map;
   delete light;
   delete skybox;
   delete ground;
