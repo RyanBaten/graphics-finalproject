@@ -276,7 +276,7 @@ int main() {
 
   // Set up ground 
   ground->setScale(2*scale/groundSize);
-  ground->generateVertices(0,10,0.2);
+  ground->generateVertices(0,2,0.2);
   ground->setTexture("textures/grass.png");
 
   // Set up cursor
