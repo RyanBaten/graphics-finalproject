@@ -126,12 +126,10 @@ int key(SDL_Event event) {
       return 0;
       break;
     case SDLK_1:
-      if (mode == MODE_PRESET) {
-        track->clearVertices();
-        camera->moveTo(0,10,0);
-        camera->setViewLocation(5,5,10);
-        cursor->setLocation(5,5,10);
-      }
+      track->clearVertices();
+      camera->moveTo(0,10,0);
+      camera->setViewLocation(5,5,10);
+      cursor->setLocation(5,5,10);
       mode = MODE_CONSTRUCT;
       light->indicatorOff();
       light->moveTo(.4*scale,.4*scale,scale);

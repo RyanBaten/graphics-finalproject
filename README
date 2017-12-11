@@ -36,12 +36,36 @@ Enter         add point for rollercoaster
 r             reset rollercoaster points
 
 How to Use
-----------
+==========
+
 When the program starts up, it will load in and display a sample track. I would recommend playing with the basic controls (arrow keys and w and s keys) to look around and change the velocity of the coaster on the track. Next, press the 4 key to enter a fun first person mode where you ride the coaster!
 
 The construction mode can be entered by pressing the 1 key. Move the cursor around and press enter a couple times to add points to the rollercoaster, after the third point is selected, the generated track will be desplayed. Add additional sections by pressing enter again. It is helpful to use the w and s keys to move the camera back and forth when trying to get a good view of the scene.
 
 Have fun!
+
+Challenges while making and what I learned:
+===========================================
+- Automatic calculation of track vertices and normals
+  - Using one bezier curve to generate two lines of a track that may not intersect requires various manipulations to be done.
+
+- Getting the coaster to rotate correctly and debugging issues with order in which rotation occurs
+  - My calculations for the angle required rotation around the y axis to occur before the rotation involving the pitch of the coaster. At first the coaster model was on an axis that my opengl code would rotate after doing y axis rotation. The fix ended up being rotating and re-exporting the model since I didn't want to mess with the Object::draw function which is also used for drawing the trees.
+     
+
+- Particle generation using point sprites
+
+- Particle behavior and not having the particles fight with eachother
+  - Requires disabling z buffer while drawing particles
+
+- Generation of random points for ground and calculating normals
+  - Better way to do it would be using a Bezier surface but at the time I implemented it, I didn't know they existed.
+
+- Avoiding the if statment mess in the key function with SDL by using a switch statement and enabling sdl key repeat.
+  - Results in a slight performance increase when the program requires many different key inputs.
+
+- Having reference points on the ground (trees) makes camera movement seem less disorienting.
+
 
 Sources:
 --------
