@@ -38,7 +38,7 @@
 #define MODE_FOLLOW 4
 #define MODE_DEBUG 5
 
-int mode = 1; // Modes: 1 Construction, 2 Riding, 3 Preset Track, 4 debug
+int mode = MODE_PRESET; 
 double width = 1000; // Screen Width
 double height = 800; // Screen Height
 double fov = 55; // Field of view
@@ -150,6 +150,9 @@ int key(SDL_Event event) {
       mode = MODE_CONSTRUCT;
       light->indicatorOff();
       light->moveTo(.4*scale,.4*scale,scale);
+      if (mode == MODE_PRESET) {
+        track->clear();
+      }
       break;
     case SDLK_2:
       mode = MODE_RIDE;
@@ -312,6 +315,9 @@ int main() {
   track->setRailWidth(0.4);
   track->setRailHeight(0.1);
   track->setRailTexture("textures/metal.png");
+  if (mode == MODE_PRESET) {
+    track->loadTrackFile("tracks/sampleTrack.track");
+  }
 
   // Coaster Setup
   coaster->loadFile("objects/coaster.obj");

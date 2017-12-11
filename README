@@ -1,10 +1,24 @@
 Controls
---------
+========
 
+General controls:
 Key           Action
 ---           ------
+1             switch to Construction mode
+2             switch to Coaster 3rd person view
+3             switch to Preset coaster loaded in/ 3rd person view
+4             switch to First person follow coaster
+5             switch to Debug mode
 Arrow keys    rotate view
+b             export track to create file yourTrack.track
+w             increase velocity
+s             decrease velocity
+
+Construction mode specific controls:
+Key           Action
+---           ------
 w             move camera forward
+s             move camera backward
 i             move cursor forward
 k             move cursor back
 j             move cursor left 
@@ -12,32 +26,13 @@ l             move cursor right
 t             move cursor up 
 y             move cursor down 
 Enter         add point for rollercoaster
-
-Modes:
-Key           Action
----           ------
-1             Construction mode
-2             Coster 3rd person view
-3             Preset coaster loaded in/ 3rd person view
-4             First person follow coaster
-5             Debug mode
+r             reset rollercoaster points
 
 cursor movement in debug mode is disabled
 
 How to Use
 ----------
 Move the cursor around and press enter a couple times to add points to the rollercoaster, after the third point is selected, the track will generate.
-
-What remains to be done
------------------------
--Fix a bug with the rollercoaster track drawing
--Create the coaster and have it move along the track
--Allow the camera to be on the coaster in first person view
--Add trees to the ground
--Fix camera angles
--Particles when coaster accelerates/brakes
-
-I think for the most part, the most difficult part is getting the track to draw 100% correctly since I use 3 point Bezier curve points and then find the offset on both sides to draw the rails. Once that is fixed, the rest should be less math intensive and more just drawing things.
 
 Sources:
 --------
@@ -52,3 +47,5 @@ https://opengameart.org/sites/default/files/forum-attachments/grass20.png
 
 Metal texture:
 https://opengameart.org/sites/default/files/oga-textures/metall010-new-tileable.png
+
+Object files for coaster and trees and their textures made in Blender and particle images made in Paint.net by me.
