@@ -117,9 +117,10 @@ void display() {
   SDL_GL_SwapBuffers();
 }
 
-int key(SDL_Event event) {
+// It is important to only handle keys that aren't intended to be held down in here, otherwise handling everything through the event loop causes the whole program to stall while the keypress events are handled
+int keyDown(SDL_Event event) {
   // I wanted to find a more efficient way of doing this than a massive if statement
-  // Lazyfoo SDL 1.2 tutorial page shows usage of a switch
+  // Lazyfoo SDL 1.2 tutorial page shows usage of a switch for this application
   // http://lazyfoo.net/tutorials/SDL/04_key_presses/index.php
   switch (event.key.keysym.sym) {
     case SDLK_ESCAPE:
@@ -154,52 +155,20 @@ int key(SDL_Event event) {
       mode = MODE_DEBUG;
       light->indicatorOn();
       break;
-    case SDLK_UP:
-      camera->rotate(0,5);
-      break;
-    case SDLK_DOWN:
-      camera->rotate(0,-5);
-      break;
-    case SDLK_LEFT:
-      camera->rotate(5,0);
-      break;
-    case SDLK_RIGHT:
-      camera->rotate(-5,0);
-      break;
     case SDLK_b:
       track->exportTrack("yourTrack.track");
       break;
     case SDLK_w:
-      if (mode == MODE_CONSTRUCT) camera->moveForward(0.5);
-      else {
+      if (mode != MODE_CONSTRUCT) {
         coaster->increaseVelocity(1);
         fire->turnOn(SDL_GetTicks()/1000.0 +2);
       }
       break;
     case SDLK_s:
-      if (mode == MODE_CONSTRUCT) camera->moveForward(-0.5);
-      else {
+      if (mode != MODE_CONSTRUCT) {
         coaster->decreaseVelocity(1);
         lightning->turnOn(SDL_GetTicks()/1000.0 +2);
       }
-      break;
-    case SDLK_i:
-      if (mode == MODE_CONSTRUCT) cursor->move(0.5,0,0);
-      break;
-    case SDLK_j:
-      if (mode == MODE_CONSTRUCT) cursor->move(0,0,-0.5);
-      break;
-    case SDLK_k:
-      if (mode == MODE_CONSTRUCT) cursor->move(-0.5,0,0);
-      break;
-    case SDLK_l:
-      if (mode == MODE_CONSTRUCT) cursor->move(0,0,0.5);
-      break;
-    case SDLK_t:
-      if (mode == MODE_CONSTRUCT) cursor->move(0,0.5,0);
-      break;
-    case SDLK_y:
-      if (mode == MODE_CONSTRUCT) cursor->move(0,-0.5,0);
       break;
     case SDLK_r:
       if (mode == MODE_CONSTRUCT) track->clearVertices();
@@ -217,6 +186,25 @@ int key(SDL_Event event) {
   }
   // Keep the program running
   return 1;
+}
+
+// Function is important for handling held keys so the event loop doesn't slow down the execution of the main loop
+void keyIdle() {
+  const Uint8 *key = SDL_GetKeyState(NULL);
+  if (key[SDLK_UP]) camera->rotate(0,5);
+  if (key[SDLK_DOWN]) camera->rotate(0,-5);
+  if (key[SDLK_LEFT]) camera->rotate(5,0);
+  if (key[SDLK_RIGHT]) camera->rotate(-5,0);
+  if (mode == MODE_CONSTRUCT) {
+    if (key[SDLK_i]) cursor->move(0.5,0,0);
+    if (key[SDLK_j]) cursor->move(0,0,-0.5);
+    if (key[SDLK_k]) cursor->move(-0.5,0,0);
+    if (key[SDLK_l]) cursor->move(0,0,0.5);
+    if (key[SDLK_t]) cursor->move(0,0.5,0);
+    if (key[SDLK_y]) cursor->move(0,-0.5,0);
+    if (key[SDLK_w]) camera->moveForward(0.5);
+    if (key[SDLK_s]) camera->moveForward(-0.5);
+  }
 }
 
 void reshape(int width, int height) {
@@ -252,15 +240,6 @@ int main() {
   SDL_WM_SetCaption("Project","project");
   // Set screen size
   reshape(screen->w, screen->h);
-
-  // Enable key repeating 
-  // Needed this because I wanted to switch my huge if statement
-  // to a switch statement and only do key handling when key pressed
-  // https://gamedev.stackexchange.com/questions/19571/how-can-i-process-continuously-held-keys-with-sdl
-  if (SDL_EnableKeyRepeat(100, 5) == -1) {
-    printf("SDL Key repeat failed to be set\n");
-    return 1;
-  }
 
   // Set up camera
   camera->moveTo(0,10,0);
@@ -363,28 +342,35 @@ int main() {
           run = 0;
           break;
         case SDL_KEYDOWN:
-          run = key(event);
-          t0 = t+0.5; // Wait before repeating
+          run = keyDown(event);
           break;
         default:
           // Do Nothing
           break;
       }
     }
-    // Repeat key every 50 ms
+    // Loop for events that occur while idle
     if (t-t0>0.05) {
-//      run = key();
+      // Call a simplified key function for held keys
+      keyIdle();
+      // Update t for next update
       t0 = t;
+      // Check if emitters should still run and for particle deaths
       fire->update(t);
       lightning->update(t);
+      // Debug Mode idle events
       if (mode == MODE_DEBUG) {
         light->moveTo(scale*Sin(t*30),.4*scale,scale*Cos(t*30));
+      // Events when the coaster need to be moving
       } else if (mode != MODE_CONSTRUCT && !track->isEmpty()) {
         last_track_vert = track->getIthTrackVertex(last_track_vert + coaster->getVelocity(), x, y, z);
+        // Face the next location and then move there to get rotation correct
         coaster->rotateToFace(x,y,z);
         coaster->moveTo(x,y,z);
+        // Emitters must follow coaster
         fire->setLocation(x,y,z);
         lightning->setLocation(x,y,z);
+        // Have the camera sit in the coaster first person view
         if (mode == MODE_FOLLOW) {
           camera->setViewLocation(x,y+cameraViewHeight,z);
           camera->moveTo(x,y+cameraViewHeight,z);
@@ -396,6 +382,7 @@ int main() {
     // Slow down display rate by sleeping 5 ms
     SDL_Delay(5);
   }
+  // Cleanup
   delete camera;
   delete light;
   delete skybox;
