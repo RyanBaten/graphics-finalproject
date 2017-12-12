@@ -51,7 +51,6 @@ Challenges while making and what I learned:
 
 - Getting the coaster to rotate correctly and debugging issues with order in which rotation occurs
   - My calculations for the angle required rotation around the y axis to occur before the rotation involving the pitch of the coaster. At first the coaster model was on an axis that my opengl code would rotate after doing y axis rotation. The fix ended up being rotating and re-exporting the model since I didn't want to mess with the Object::draw function which is also used for drawing the trees.
-     
 
 - Particle generation using point sprites
 
@@ -61,8 +60,10 @@ Challenges while making and what I learned:
 - Generation of random points for ground and calculating normals
   - Better way to do it would be using a Bezier surface but at the time I implemented it, I didn't know they existed.
 
-- Avoiding the if statment mess in the key function with SDL by using a switch statement and enabling sdl key repeat.
-  - Results in a slight performance increase when the program requires many different key inputs.
+- The main loop can slow down considerably while keys are pressed/held if events aren't handled correctly.
+  - At first, I handled all key presses and holds with a function containing if statements through the event handling section of the main loop. After testing, I found that it's best to have a separate function for key presses and keys that are meant to be held. Key presses should be handled in the event loop, however held keys can be handled in the idle loop to avoid slowing down execution of the idle loop by flooding the event handler with events.
+  - It is important to remove any delay on the idle loop that the event loop may impose on it. When starting the development, I had introduced such a delay to avoid cases where keys would be handled twice in a row.
+  - The end result of this was that instead of the coaster pausing while any keys were pressed, the coaster now glides smoothly at all times and the whole application feels smoother.
 
 - Having reference points on the ground (trees) makes camera movement seem less disorienting.
 
