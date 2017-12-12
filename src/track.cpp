@@ -23,33 +23,29 @@ void Track::draw() {
   glBegin(GL_QUADS);
     for (int i=0; i<iterations; i+=12) {
       // Top
-      glNormal3f(normals.at(norm+6), normals.at(norm+7), normals.at(norm+8));
+      glNormal3f(normals.at(norm), normals.at(norm+1), normals.at(norm+2));
       glVertex3f(trackVertices.at(i+6),trackVertices.at(i+7),trackVertices.at(i+8));
-      glVertex3f(trackVertices.at(i),trackVertices.at(i+1),trackVertices.at(i+2));
-      glNormal3f(normals.at(norm+18), normals.at(norm+19), normals.at(norm+20));
-      glVertex3f(trackVertices.at(i+24),trackVertices.at(i+25),trackVertices.at(i+26));
       glVertex3f(trackVertices.at(i+30),trackVertices.at(i+31),trackVertices.at(i+32));
+      glVertex3f(trackVertices.at(i+24),trackVertices.at(i+25),trackVertices.at(i+26));
+      glVertex3f(trackVertices.at(i),trackVertices.at(i+1),trackVertices.at(i+2));
       // Bottom
-      glNormal3f(normals.at(norm+9), normals.at(norm+10), normals.at(norm+11));
+      glNormal3f(normals.at(norm+3), normals.at(norm+4), normals.at(norm+5));
       glVertex3f(trackVertices.at(i+9),trackVertices.at(i+10),trackVertices.at(i+11));
       glVertex3f(trackVertices.at(i+3),trackVertices.at(i+4),trackVertices.at(i+5));
-      glNormal3f(normals.at(norm+21), normals.at(norm+22), normals.at(norm+23));
       glVertex3f(trackVertices.at(i+27),trackVertices.at(i+28),trackVertices.at(i+29));
       glVertex3f(trackVertices.at(i+33),trackVertices.at(i+34),trackVertices.at(i+35));
       // Left Side
-      glNormal3f(normals.at(norm), normals.at(norm+1), normals.at(norm+2));
+      glNormal3f(normals.at(norm+6), normals.at(norm+7), normals.at(norm+8));
       glVertex3f(trackVertices.at(i),trackVertices.at(i+1),trackVertices.at(i+2));
-      glVertex3f(trackVertices.at(i+3),trackVertices.at(i+4),trackVertices.at(i+5));
-      glNormal3f(normals.at(norm+12), normals.at(norm+13), normals.at(norm+14));
-      glVertex3f(trackVertices.at(i+27),trackVertices.at(i+28),trackVertices.at(i+29));
       glVertex3f(trackVertices.at(i+24),trackVertices.at(i+25),trackVertices.at(i+26));
+      glVertex3f(trackVertices.at(i+27),trackVertices.at(i+28),trackVertices.at(i+29));
+      glVertex3f(trackVertices.at(i+3),trackVertices.at(i+4),trackVertices.at(i+5));
       // Right Side
-      glNormal3f(normals.at(norm+3), normals.at(norm+4), normals.at(norm+5));
+      glNormal3f(normals.at(norm+9), normals.at(norm+10), normals.at(norm+11));
       glVertex3f(trackVertices.at(i+9),trackVertices.at(i+10),trackVertices.at(i+11));
-      glVertex3f(trackVertices.at(i+6),trackVertices.at(i+7),trackVertices.at(i+8));
-      glNormal3f(normals.at(norm+15), normals.at(norm+16), normals.at(norm+17));
-      glVertex3f(trackVertices.at(i+30),trackVertices.at(i+31),trackVertices.at(i+32));
       glVertex3f(trackVertices.at(i+33),trackVertices.at(i+34),trackVertices.at(i+35));
+      glVertex3f(trackVertices.at(i+30),trackVertices.at(i+31),trackVertices.at(i+32));
+      glVertex3f(trackVertices.at(i+6),trackVertices.at(i+7),trackVertices.at(i+8));
       // Iterate on normals
       if ((i/12)%2 == 1) {
         norm += 12;
@@ -94,6 +90,7 @@ void Track::generateTrack(double smoothness) {
   double side_norm_x, side_norm_z;
   // Clear current vertices
   trackVertices.clear();
+  normals.clear();
   // Setting the veriables containing the last point
   last_x = last_y = last_z = 0;
   if (size >= 3) {
@@ -177,6 +174,14 @@ void Track::generateTrack(double smoothness) {
         // Put in correct normals for lighting
         // Since the side normals are used in generating the trackVertices,
         // put them in the vector first before finding the up and down vectors
+          // Top
+          normals.push_back(-diff_y*diff_x);
+          normals.push_back(diff_x*diff_x+diff_z*diff_z);
+          normals.push_back(-diff_y*diff_z);
+          // Bottom
+          normals.push_back(diff_y*diff_x);
+          normals.push_back(-diff_x*diff_x-diff_z*diff_z);
+          normals.push_back(diff_y*diff_z);
           // Left
           normals.push_back(diff_z);
           normals.push_back(0);
@@ -186,13 +191,6 @@ void Track::generateTrack(double smoothness) {
           normals.push_back(0);
           normals.push_back(diff_x);
           // Up
-          normals.push_back(-diff_y*diff_x);
-          normals.push_back(diff_x*diff_x+diff_z*diff_z);
-          normals.push_back(-diff_y*diff_z);
-          // Down
-          normals.push_back(diff_y*diff_x);
-          normals.push_back(-diff_x*diff_x-diff_z*diff_z);
-          normals.push_back(diff_y*diff_z);
         // Update Last values
         last_x = result_x;
         last_y = result_y;

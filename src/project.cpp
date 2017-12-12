@@ -123,9 +123,11 @@ int keyDown(SDL_Event event) {
   // Lazyfoo SDL 1.2 tutorial page shows usage of a switch for this application
   // http://lazyfoo.net/tutorials/SDL/04_key_presses/index.php
   switch (event.key.keysym.sym) {
+    // Quit
     case SDLK_ESCAPE:
       return 0;
       break;
+    // Construction mode
     case SDLK_1:
       track->clearVertices();
       camera->moveTo(0,10,0);
@@ -135,44 +137,53 @@ int keyDown(SDL_Event event) {
       light->indicatorOff();
       light->moveTo(.4*scale,.4*scale,scale);
       break;
+    // 3rd person view mode
     case SDLK_2:
       mode = MODE_RIDE;
       light->indicatorOff();
       light->moveTo(.4*scale,.4*scale,scale);
       break;
+    // Preset track loaded and 3rd person view mode
     case SDLK_3:
       mode = MODE_PRESET;
       track->loadTrackFile("tracks/sampleTrack.track");
       light->indicatorOff();
       light->moveTo(.4*scale,.4*scale,scale);
       break;
+    // First person coastedr riding mode
     case SDLK_4:
       mode = MODE_FOLLOW;
       light->indicatorOff();
       light->moveTo(.4*scale,.4*scale,scale);
       break;
+    // Debug mode
     case SDLK_5:
       mode = MODE_DEBUG;
       light->indicatorOn();
       break;
+    // Export track file
     case SDLK_b:
       track->exportTrack("yourTrack.track");
       break;
+    // Turn on particles for 1 second when speeding up
     case SDLK_w:
       if (mode != MODE_CONSTRUCT) {
         coaster->increaseVelocity(1);
-        fire->turnOn(SDL_GetTicks()/1000.0 +2);
+        fire->turnOn(SDL_GetTicks()/1000.0 +1);
       }
       break;
+    // Turn on particles for 1 second when slowing down
     case SDLK_s:
       if (mode != MODE_CONSTRUCT) {
         coaster->decreaseVelocity(1);
-        lightning->turnOn(SDL_GetTicks()/1000.0 +2);
+        lightning->turnOn(SDL_GetTicks()/1000.0 +1);
       }
       break;
+    // Clear the track
     case SDLK_r:
       if (mode == MODE_CONSTRUCT) track->clearVertices();
       break;
+    // Add point to the track in construct mode
     case SDLK_RETURN:
       if (mode == MODE_CONSTRUCT) {
         double x,y,z;
@@ -191,17 +202,20 @@ int keyDown(SDL_Event event) {
 // Function is important for handling held keys so the event loop doesn't slow down the execution of the main loop
 void keyIdle() {
   const Uint8 *key = SDL_GetKeyState(NULL);
+  // Basic arrowkey camera movement
   if (key[SDLK_UP]) camera->rotate(0,5);
   if (key[SDLK_DOWN]) camera->rotate(0,-5);
   if (key[SDLK_LEFT]) camera->rotate(5,0);
   if (key[SDLK_RIGHT]) camera->rotate(-5,0);
   if (mode == MODE_CONSTRUCT) {
+    // Cursor movement
     if (key[SDLK_i]) cursor->move(0.5,0,0);
     if (key[SDLK_j]) cursor->move(0,0,-0.5);
     if (key[SDLK_k]) cursor->move(-0.5,0,0);
     if (key[SDLK_l]) cursor->move(0,0,0.5);
     if (key[SDLK_t]) cursor->move(0,0.5,0);
     if (key[SDLK_y]) cursor->move(0,-0.5,0);
+    // Additional camera movement to make construction easier
     if (key[SDLK_w]) camera->moveForward(0.5);
     if (key[SDLK_s]) camera->moveForward(-0.5);
   }
