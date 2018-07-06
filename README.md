@@ -5,8 +5,8 @@ OpenGL Roller Coaster
 OpenGL version 2
 SDL version 1.2
 
-![screenshot 1](./project_screenshot1.jpeg)
-![screenshot 2](./project_screenshot2.jpeg)
+![screenshot 1](https://github.com/RyanBaten/graphics-finalproject/blob/master/project_screenshot1.jpg)
+![screenshot 2](https://github.com/RyanBaten/graphics-finalproject/blob/master/project_screenshot2.jpg)
 
 Controls
 ========
@@ -26,7 +26,7 @@ General controls:
 |s           |  decrease velocity
 
 Construction mode specific controls:
-|Key         | Action |
+| Key        | Action |
 | ---------- | ------ |
 |w           |  move camera forward
 |s           |  move camera backward
