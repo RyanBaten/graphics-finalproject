@@ -5,8 +5,8 @@ OpenGL Roller Coaster
 OpenGL version 2
 SDL version 1.2
 
-![screenshot 1](project_screenshot1.jpeg)
-![screenshot 2](project_screenshot2.jpeg)
+![screenshot 1](./project_screenshot1.jpeg)
+![screenshot 2](./project_screenshot2.jpeg)
 
 Controls
 ========
