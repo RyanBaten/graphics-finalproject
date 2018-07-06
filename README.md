@@ -26,6 +26,7 @@ General controls:
 |s           |  decrease velocity
 
 Construction mode specific controls:
+
 | Key        | Action |
 | ---------- | ------ |
 |w           |  move camera forward
